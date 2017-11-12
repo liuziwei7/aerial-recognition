@@ -1,0 +1,6 @@
+*.DS_Store
+code/_pycache_/*
+code/data_ml_functions/_pycache_/*
+*.pyc
+data/*
+
