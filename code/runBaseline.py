@@ -18,6 +18,9 @@ limitations under the License.
 __author__ = 'jhuapl'
 __version__ = 0.1
 
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 import sys
 
 from fmowBaseline import FMOWBaseline
@@ -27,6 +30,8 @@ def main(argv):
     baseline = FMOWBaseline(params, argv)
     if baseline.params.train_cnn:
         baseline.train_cnn()
+    if baseline.params.train_resnet:
+        baseline.train_resnet()
     if baseline.params.generate_cnn_codes:
         baseline.generate_cnn_codes()
     if baseline.params.train_lstm:

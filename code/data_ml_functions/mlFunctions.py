@@ -20,7 +20,7 @@ __author__ = 'jhuapl'
 __version__ = 0.1
 
 import json
-from keras.applications import VGG16,imagenet_utils
+from keras.applications import VGG16,ResNet50,imagenet_utils
 from keras.layers import Dense,Input,merge,Flatten,Dropout,LSTM
 from keras.models import Sequential,Model
 from keras.preprocessing import image
@@ -43,6 +43,40 @@ def get_cnn_model(params):
     
     input_tensor = Input(shape=(params.target_img_size[0],params.target_img_size[1],params.num_channels))
     baseModel = VGG16(weights='imagenet', include_top=False, input_tensor=input_tensor)
+
+    modelStruct = baseModel.output
+    modelStruct = Flatten(input_shape=baseModel.output_shape[1:])(modelStruct)
+
+    if params.use_metadata:
+        auxiliary_input = Input(shape=(params.metadata_length,), name='aux_input')
+        modelStruct = merge([modelStruct,auxiliary_input],mode='concat')
+
+    modelStruct = Dense(params.cnn_last_layer_length, activation='relu', name='fc1')(modelStruct)
+    modelStruct = Dropout(0.5)(modelStruct)
+    modelStruct = Dense(params.cnn_last_layer_length, activation='relu', name='fc2')(modelStruct)
+    modelStruct = Dropout(0.5)(modelStruct)
+    predictions = Dense(params.num_labels, activation='softmax')(modelStruct)
+
+    if not params.use_metadata:
+        model = Model(input=[baseModel.input], output=predictions)
+    else:
+        model = Model(input=[baseModel.input, auxiliary_input], output=predictions)
+
+    for i,layer in enumerate(model.layers):
+        layer.trainable = True
+
+    return model
+
+def get_resnet_model(params):   
+    """
+    Load base CNN model and add metadata fusion layers if 'use_metadata' is set in params.py
+    :param params: global parameters, used to find location of the dataset and json file
+    :return model: CNN model with or without depending on params
+    """
+    
+    input_tensor = Input(shape=(params.target_img_size[0],params.target_img_size[1],params.num_channels))
+    # baseModel = VGG16(weights='imagenet', include_top=False, input_tensor=input_tensor)
+    baseModel = ResNet50(weights='imagenet', include_top=False, input_tensor=input_tensor)
 
     modelStruct = baseModel.output
     modelStruct = Flatten(input_shape=baseModel.output_shape[1:])(modelStruct)

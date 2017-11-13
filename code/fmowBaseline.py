@@ -24,7 +24,7 @@ from keras.callbacks import ModelCheckpoint
 from keras.preprocessing import image
 from keras.models import Model, load_model
 from keras.applications import VGG16,imagenet_utils
-from data_ml_functions.mlFunctions import get_cnn_model,img_metadata_generator,get_lstm_model,codes_metadata_generator
+from data_ml_functions.mlFunctions import get_cnn_model,get_resnet_model,img_metadata_generator,get_lstm_model,codes_metadata_generator
 from data_ml_functions.dataFunctions import prepare_data,calculate_class_weights
 import numpy as np
 import os
@@ -51,6 +51,8 @@ class FMOWBaseline:
             performAll = (arg == '-all')
             if performAll or arg == '-cnn':
                 self.params.train_cnn = True
+            if performAll or arg == '-resnet':
+                self.params.train_resnet = True
             if performAll or arg == '-codes':
                 self.params.generate_cnn_codes = True
             if performAll or arg == '-lstm':
@@ -68,11 +70,13 @@ class FMOWBaseline:
                 
         if self.params.use_metadata:
             self.params.files['cnn_model'] = os.path.join(self.params.directories['cnn_models'], 'cnn_model_with_metadata.model')
+            self.params.files['resnet_model'] = os.path.join(self.params.directories['resnet_models'], 'resnet_model_with_metadata.model')
             self.params.files['lstm_model'] = os.path.join(self.params.directories['lstm_models'], 'lstm_model_with_metadata.model')
             self.params.files['cnn_codes_stats'] = os.path.join(self.params.directories['working'], 'cnn_codes_stats_with_metadata.json')
             self.params.files['lstm_training_struct'] = os.path.join(self.params.directories['working'], 'lstm_training_struct_with_metadata.json')
         else:
             self.params.files['cnn_model'] = os.path.join(self.params.directories['cnn_models'], 'cnn_model_no_metadata.model')
+            self.params.files['resnet_model'] = os.path.join(self.params.directories['resnet_models'], 'resnet_model_no_metadata.model')
             self.params.files['lstm_model'] = os.path.join(self.params.directories['lstm_models'], 'lstm_model_no_metadata.model')
             self.params.files['cnn_codes_stats'] = os.path.join(self.params.directories['working'], 'cnn_codes_stats_no_metadata.json')
             self.params.files['lstm_training_struct'] = os.path.join(self.params.directories['working'], 'lstm_training_struct_no_metadata.json')
@@ -107,6 +111,37 @@ class FMOWBaseline:
 #            epochs=self.params.cnn_epochs, class_weight=classWeights, callbacks=callbacks_list)
 
         model.save(self.params.files['cnn_model'])
+
+    def train_resnet(self):
+        """
+        Train CNN with or without metadata depending on setting of 'use_metadata' in params.py.
+        :param: 
+        :return: 
+        """
+        
+        trainData = json.load(open(self.params.files['training_struct']))
+
+        metadataStats = json.load(open(self.params.files['dataset_stats']))
+
+        model = get_resnet_model(self.params)
+        #model = make_parallel(model, 4)
+        model.compile(optimizer=Adam(lr=self.params.cnn_adam_learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
+        
+#        classWeights = np.array(json.load(open(self.params.files['class_weight'])))
+
+        train_datagen = img_metadata_generator(self.params, trainData, metadataStats)
+        
+        print("training")
+        filePath = os.path.join(self.params.directories['resnet_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
+        checkpoint = ModelCheckpoint(filepath=filePath, monitor='loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=5)
+        callbacks_list = [checkpoint]
+
+        model.fit_generator(train_datagen,
+            steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
+            epochs=self.params.cnn_epochs, callbacks=callbacks_list)
+#            epochs=self.params.cnn_epochs, class_weight=classWeights, callbacks=callbacks_list)
+
+        model.save(self.params.files['resnet_model'])
         
     def train_lstm(self):
         """
