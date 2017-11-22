@@ -25,12 +25,15 @@ num_workers = cpu_count()
 
 use_metadata = True
 
-batch_size_cnn = 64
-batch_size_lstm = 64
-batch_size_eval = 128
-metadata_length = 21
+# batch_size_cnn = 128
+batch_size_cnn = 16
+batch_size_lstm = 512
+# batch_size_eval = 128
+batch_size_eval = 16
+metadata_length = 45
 num_channels = 3
 cnn_last_layer_length = 4096
+cnn_lstm_layer_length = 2208
 
 target_img_size = (224,224)
 
@@ -45,10 +48,10 @@ test_lstm = False
 #LEARNING PARAMS
 cnn_adam_learning_rate = 1e-4
 cnn_adam_loss = 'categorical_crossentropy'
-cnn_epochs = 15
+cnn_epochs = 50
 	
 lstm_adam_learning_rate = 1e-4
-lstm_epochs = 5
+lstm_epochs = 100
 lstm_loss = 'categorical_crossentropy'
 
 #DIRECTORIES AND FILES
@@ -61,11 +64,9 @@ directories['working'] = os.path.join('..', 'data', 'working')
 directories['train_data'] = os.path.join(directories['input'], 'train_data')
 directories['test_data'] = os.path.join(directories['input'], 'test_data')
 directories['cnn_models'] = os.path.join(directories['working'], 'cnn_models')
-directories['resnet_models'] = os.path.join(directories['working'], 'resnet_models')
 directories['lstm_models'] = os.path.join(directories['working'], 'lstm_models')
 directories['predictions'] = os.path.join(directories['output'], 'predictions')
 directories['cnn_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_checkpoint_weights')
-directories['resnet_checkpoint_weights'] = os.path.join(directories['working'], 'resnet_checkpoint_weights')
 directories['lstm_checkpoint_weights'] = os.path.join(directories['working'], 'lstm_checkpoint_weights')
 
 directories['cnn_codes'] = os.path.join(directories['working'], 'cnn_codes')

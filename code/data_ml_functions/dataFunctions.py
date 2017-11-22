@@ -32,10 +32,6 @@ from functools import partial
 from tqdm import tqdm
 import warnings
 
-import code
-
-import pdb
-
 def prepare_data(params):
     """
     Saves sub images, converts metadata to feature vectors and saves in JSON files, 
@@ -56,8 +52,6 @@ def prepare_data(params):
     keysToKeep = ['image_format', 'target_img_size', 'metadata_length', 'category_names']
     paramsDict = {keepKey: paramsDict[keepKey] for keepKey in keysToKeep}
     
-    results = []
-
     for currDir in walkDirs:
         isTrain = (currDir == 'train') or (currDir == 'val')
         if isTrain:
@@ -65,21 +59,19 @@ def prepare_data(params):
         else:
             outDir = params.directories['test_data']
 
-        print('Looping through sequences in: ' + currDir)
+        print('Queuing sequences in: ' + currDir)
         for root, dirs, files in tqdm(os.walk(os.path.join(params.directories['dataset'], currDir))):
             if len(files) > 0:
                 slashes = [i for i,ltr in enumerate(root) if ltr == '/']
                         
             for file in files:
                 if file.endswith('_rgb.json'): #skip _msrgb images
-                    # task = partial(_process_file, file, slashes, root, isTrain, outDir, paramsDict)
-                    # futures.append(executor.submit(task))
-                    results.extend(_process_file(file, slashes, root, isTrain, outDir, paramsDict))
-                    print(file)
+                    task = partial(_process_file, file, slashes, root, isTrain, outDir, paramsDict)
+                    futures.append(executor.submit(task))
 
-    print('Preprocessing all files...')
-    # results = []
-    # [results.extend(future.result()) for future in tqdm(futures)]
+    print('Wait for all preprocessing tasks to complete...')
+    results = []
+    [results.extend(future.result()) for future in tqdm(futures)]
     allTrainFeatures = [np.array(r[0]) for r in results if r[0] is not None]
     
     metadataTrainSum = np.zeros(params.metadata_length)
@@ -89,6 +81,9 @@ def prepare_data(params):
     trainingData = [r[1] for r in results if r[1] is not None]
     trainCount = len(trainingData)
     testData = [r[2] for r in results if r[2] is not None]
+
+    # Shutdown the executor and free resources
+    executor.shutdown()
 
     metadataMean = metadataTrainSum / trainCount
     metadataMax = np.zeros(params.metadata_length)
@@ -167,13 +162,43 @@ def _process_file(file, slashes, root, isTrain, outDir, params):
             continue
 
         # train with context around box
-        widthBuffer = int((box[2] * 0.5) / 2.0)
-        heightBuffer = int((box[2] * 0.5) / 2.0)
+        
+        contextMultWidth = 0.15
+        contextMultHeight = 0.15
+        
+        wRatio = float(box[2]) / img.shape[0]
+        hRatio = float(box[3]) / img.shape[1]
+        
+        if wRatio < 0.5 and wRatio >= 0.4:
+            contextMultWidth = 0.2
+        if wRatio < 0.4 and wRatio >= 0.3:
+            contextMultWidth = 0.3
+        if wRatio < 0.3 and wRatio >= 0.2:
+            contextMultWidth = 0.5
+        if wRatio < 0.2 and wRatio >= 0.1:
+            contextMultWidth = 1
+        if wRatio < 0.1:
+            contextMultWidth = 2
+            
+        if hRatio < 0.5 and hRatio >= 0.4:
+            contextMultHeight = 0.2
+        if hRatio < 0.4 and hRatio >= 0.3:
+            contextMultHeight = 0.3
+        if hRatio < 0.3 and hRatio >= 0.2:
+            contextMultHeight = 0.5
+        if hRatio < 0.2 and hRatio >= 0.1:
+            contextMultHeight = 1
+        if hRatio < 0.1:
+            contextMultHeight = 2
+        
+        
+        widthBuffer = int((box[2] * contextMultWidth) / 2.0)
+        heightBuffer = int((box[3] * contextMultHeight) / 2.0)
 
         r1 = box[1] - heightBuffer
-        r2 = r1 + box[3] + heightBuffer
+        r2 = box[1] + box[3] + heightBuffer
         c1 = box[0] - widthBuffer
-        c2 = c1 + box[2] + widthBuffer
+        c2 = box[0] + box[2] + widthBuffer
 
         if r1 < 0:
             r1 = 0
@@ -188,16 +213,15 @@ def _process_file(file, slashes, root, isTrain, outDir, params):
             continue
 
         subImg = img[r1:r2, c1:c2, :]
-        if subImg.shape[0] == 2:
-            subImg = np.tile(subImg[0, :, :], (3, 1, 1))    
-        subImg = image.array_to_img(subImg) 
+        subImg = image.array_to_img(subImg)
         subImg = subImg.resize(params['target_img_size'])
         subImg.save(imgPath)
 
-        features = json_to_feature_vector(params['metadata_length'], jsonData)
+        features = json_to_feature_vector(params, jsonData, bb)
         features = features.tolist()
 
         json.dump(features, open(featuresPath, 'w'))
+        
 
         if isTrain:
             allResults.append((features, {"features_path": featuresPath, "img_path": imgPath, "category": params['category_names'].index(category)}, None))
@@ -206,14 +230,9 @@ def _process_file(file, slashes, root, isTrain, outDir, params):
 
     return allResults
 
-def json_to_feature_vector(metadata_length, jsonData):
-    """
-    Generates feature vector for CNN fusion from metadata
-    :param metadata_length: total number of metadata parameters being used
-    :param jsonData: metadata from a JSON file
-    :return features: numpy feature vector representation of the metadata
-    """
-    features = np.zeros(metadata_length, dtype=float)
+
+def json_to_feature_vector(params, jsonData, bb):
+    features = np.zeros(params['metadata_length'], dtype=float)
     features[0] = float(jsonData['gsd'])
     x,y = utm_to_xy(jsonData['utm'])
     features[1] = x
@@ -230,17 +249,44 @@ def json_to_feature_vector(metadata_length, jsonData):
     else:
         features[8] = 1.0
     features[9] = float(jsonData['pan_resolution_dbl'])
-    features[10] = float(jsonData['multi_resolution_dbl'])
-    features[11] = float(jsonData['target_azimuth_dbl']) / 360.0
-    features[12] = float(jsonData['sun_azimuth_dbl']) / 360.0
-    features[13] = float(jsonData['sun_elevation_dbl']) / 90.0
-    features[14] = float(jsonData['off_nadir_angle_dbl']) / 90.0
-    features[15] = float(jsonData['bounding_boxes'][0]['box'][2])
-    features[16] = float(jsonData['bounding_boxes'][0]['box'][3])
-    features[17] = float(jsonData['img_width'])
-    features[18] = float(jsonData['img_height'])
-    features[19] = float(len(jsonData['approximate_wavelengths']))
-    features[20] = float(date.weekday())
+    features[10] = float(jsonData['pan_resolution_start_dbl'])
+    features[11] = float(jsonData['pan_resolution_end_dbl'])
+    features[12] = float(jsonData['pan_resolution_min_dbl'])
+    features[13] = float(jsonData['pan_resolution_max_dbl'])
+    features[14] = float(jsonData['multi_resolution_dbl'])
+    features[15] = float(jsonData['multi_resolution_min_dbl'])
+    features[16] = float(jsonData['multi_resolution_max_dbl'])
+    features[17] = float(jsonData['multi_resolution_start_dbl'])
+    features[18] = float(jsonData['multi_resolution_end_dbl'])
+    features[19] = float(jsonData['target_azimuth_dbl']) / 360.0
+    features[20] = float(jsonData['target_azimuth_min_dbl']) / 360.0
+    features[21] = float(jsonData['target_azimuth_max_dbl']) / 360.0
+    features[22] = float(jsonData['target_azimuth_start_dbl']) / 360.0
+    features[23] = float(jsonData['target_azimuth_end_dbl']) / 360.0
+    features[24] = float(jsonData['sun_azimuth_dbl']) / 360.0
+    features[25] = float(jsonData['sun_azimuth_min_dbl']) / 360.0
+    features[26] = float(jsonData['sun_azimuth_max_dbl']) / 360.0
+    features[27] = float(jsonData['sun_elevation_min_dbl']) / 90.0
+    features[28] = float(jsonData['sun_elevation_dbl']) / 90.0
+    features[29] = float(jsonData['sun_elevation_max_dbl']) / 90.0
+    features[30] = float(jsonData['off_nadir_angle_dbl']) / 90.0
+    features[31] = float(jsonData['off_nadir_angle_min_dbl']) / 90.0
+    features[32] = float(jsonData['off_nadir_angle_max_dbl']) / 90.0
+    features[33] = float(jsonData['off_nadir_angle_start_dbl']) / 90.0
+    features[34] = float(jsonData['off_nadir_angle_end_dbl']) / 90.0
+    features[35] = float(bb['box'][2])
+    features[36] = float(bb['box'][3])
+    features[37] = float(jsonData['img_width'])
+    features[38] = float(jsonData['img_height'])
+    features[39] = float(date.weekday())
+    features[40] = min([features[35], features[36]]) / max([features[37], features[38]])
+    features[41] = features[35] / features[37]
+    features[42] = features[36] / features[38]
+    features[43] = date.second
+    if len(jsonData['bounding_boxes']) == 1:
+        features[44] = 1.0
+    else:
+        features[44] = 0.0
     
     return features
                   

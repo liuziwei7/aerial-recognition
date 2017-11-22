@@ -1,0 +1,3 @@
+[submodule "code/DenseNet"]
+	path = code/DenseNet
+	url = https://github.com/titu1994/DenseNet.git

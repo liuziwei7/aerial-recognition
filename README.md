@@ -1,17 +1,18 @@
 # fMoW: Functional Map of the World
 
-This code was developed by [JHU/APL](http://www.jhuapl.edu).
+This code was developed by [JHU/APL](https://jhuapl.edu).
 
 
 ## Dependencies
 
 The following libraries were used for training/testing the deep learning models:
 
-Keras 2.0.5
+Keras 2.0.8
 
-Tensorflow 1.2.1
+Tensorflow 1.3.0
 
-tqdm
+DenseNet from [titu1994/DenseNet](https://github.com/titu1994/DenseNet)
+
 
 ## Dataset
 
@@ -88,6 +89,23 @@ Once this is complete, the following arguments can be passed in to run different
 ```
 
 Our best performing model is the CNN-only approach, which sums predictions over each temporal view and then takes an argmax. However, we provide code for using an LSTM, which performs slightly worse, so that modifications can be made.
+
+## Pre-trained Models
+
+Pre-trained models can be found under Releases: [https://github.com/fMoW/baseline/releases](https://github.com/fMoW/baseline/releases)
+
+## References
+
+If you would like to cite this baseline, please reference:
+```
+@article{fmow2017,
+  title={Functional Map of the World},
+  author={Christie, Gordon and Fendley, Neil and Wilson, James and Mukherjee, Ryan},
+  journal={arXiv:TBD},
+  year={2017}
+}
+```
+**Note: This will be updated on Tuesday when published.**
 
 ## License
 

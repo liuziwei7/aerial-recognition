@@ -23,15 +23,16 @@ from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
 from keras.preprocessing import image
 from keras.models import Model, load_model
-from keras.applications import VGG16,imagenet_utils
-from data_ml_functions.mlFunctions import get_cnn_model,get_resnet_model,img_metadata_generator,get_lstm_model,codes_metadata_generator
+from keras.applications import imagenet_utils
+from data_ml_functions.mlFunctions import get_cnn_model,img_metadata_generator,get_lstm_model,codes_metadata_generator
 from data_ml_functions.dataFunctions import prepare_data,calculate_class_weights
 import numpy as np
 import os
 
-from data_ml_functions.mlFunctions import load_cnn_batch
-from data_ml_functions.dataFunctions import get_batch_inds
 #from data_ml_functions.multi_gpu import make_parallel
+
+from concurrent.futures import ProcessPoolExecutor
+from tqdm import tqdm
 
 import time
 
@@ -51,8 +52,6 @@ class FMOWBaseline:
             performAll = (arg == '-all')
             if performAll or arg == '-cnn':
                 self.params.train_cnn = True
-            if performAll or arg == '-resnet':
-                self.params.train_resnet = True
             if performAll or arg == '-codes':
                 self.params.generate_cnn_codes = True
             if performAll or arg == '-lstm':
@@ -69,17 +68,19 @@ class FMOWBaseline:
                 self.params.use_metadata = False
                 
         if self.params.use_metadata:
-            self.params.files['cnn_model'] = os.path.join(self.params.directories['cnn_models'], 'cnn_model_with_metadata.model')
-            self.params.files['resnet_model'] = os.path.join(self.params.directories['resnet_models'], 'resnet_model_with_metadata.model')
-            self.params.files['lstm_model'] = os.path.join(self.params.directories['lstm_models'], 'lstm_model_with_metadata.model')
+            # self.params.files['cnn_model'] = os.path.join(self.params.directories['cnn_models'], 'cnn_model_with_metadata.model')
+            self.params.files['cnn_model'] = os.path.join(self.params.directories['cnn_models'], 'cnn_image_and_metadata.model')
+            # self.params.files['lstm_model'] = os.path.join(self.params.directories['lstm_models'], 'lstm_model_with_metadata.model')
+            self.params.files['lstm_model'] = os.path.join(self.params.directories['lstm_models'], 'lstm_image_and_metadata.model')
             self.params.files['cnn_codes_stats'] = os.path.join(self.params.directories['working'], 'cnn_codes_stats_with_metadata.json')
             self.params.files['lstm_training_struct'] = os.path.join(self.params.directories['working'], 'lstm_training_struct_with_metadata.json')
+            self.params.files['lstm_test_struct'] = os.path.join(self.params.directories['working'], 'lstm_test_struct_with_metadata.json')
         else:
             self.params.files['cnn_model'] = os.path.join(self.params.directories['cnn_models'], 'cnn_model_no_metadata.model')
-            self.params.files['resnet_model'] = os.path.join(self.params.directories['resnet_models'], 'resnet_model_no_metadata.model')
             self.params.files['lstm_model'] = os.path.join(self.params.directories['lstm_models'], 'lstm_model_no_metadata.model')
             self.params.files['cnn_codes_stats'] = os.path.join(self.params.directories['working'], 'cnn_codes_stats_no_metadata.json')
             self.params.files['lstm_training_struct'] = os.path.join(self.params.directories['working'], 'lstm_training_struct_no_metadata.json')
+            self.params.files['lstm_test_struct'] = os.path.join(self.params.directories['working'], 'lstm_test_struct_no_metadata.json')
     
     def train_cnn(self):
         """
@@ -89,59 +90,25 @@ class FMOWBaseline:
         """
         
         trainData = json.load(open(self.params.files['training_struct']))
-
         metadataStats = json.load(open(self.params.files['dataset_stats']))
 
         model = get_cnn_model(self.params)
         #model = make_parallel(model, 4)
         model.compile(optimizer=Adam(lr=self.params.cnn_adam_learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
-        
-#        classWeights = np.array(json.load(open(self.params.files['class_weight'])))
 
         train_datagen = img_metadata_generator(self.params, trainData, metadataStats)
-        
+
         print("training")
         filePath = os.path.join(self.params.directories['cnn_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
-        checkpoint = ModelCheckpoint(filepath=filePath, monitor='loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=5)
+        checkpoint = ModelCheckpoint(filepath=filePath, monitor='loss', verbose=0, save_best_only=False,
+                                     save_weights_only=False, mode='auto', period=5)
         callbacks_list = [checkpoint]
 
         model.fit_generator(train_datagen,
-            steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
-            epochs=self.params.cnn_epochs, callbacks=callbacks_list)
-#            epochs=self.params.cnn_epochs, class_weight=classWeights, callbacks=callbacks_list)
+                            steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
+                            epochs=self.params.cnn_epochs, callbacks=callbacks_list)
 
         model.save(self.params.files['cnn_model'])
-
-    def train_resnet(self):
-        """
-        Train CNN with or without metadata depending on setting of 'use_metadata' in params.py.
-        :param: 
-        :return: 
-        """
-        
-        trainData = json.load(open(self.params.files['training_struct']))
-
-        metadataStats = json.load(open(self.params.files['dataset_stats']))
-
-        model = get_resnet_model(self.params)
-        #model = make_parallel(model, 4)
-        model.compile(optimizer=Adam(lr=self.params.cnn_adam_learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
-        
-#        classWeights = np.array(json.load(open(self.params.files['class_weight'])))
-
-        train_datagen = img_metadata_generator(self.params, trainData, metadataStats)
-        
-        print("training")
-        filePath = os.path.join(self.params.directories['resnet_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
-        checkpoint = ModelCheckpoint(filepath=filePath, monitor='loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=5)
-        callbacks_list = [checkpoint]
-
-        model.fit_generator(train_datagen,
-            steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
-            epochs=self.params.cnn_epochs, callbacks=callbacks_list)
-#            epochs=self.params.cnn_epochs, class_weight=classWeights, callbacks=callbacks_list)
-
-        model.save(self.params.files['resnet_model'])
         
     def train_lstm(self):
         """
@@ -149,6 +116,7 @@ class FMOWBaseline:
         :param: 
         :return: 
         """
+
         codesTrainData = json.load(open(self.params.files['lstm_training_struct']))
         codesStats = json.load(open(self.params.files['cnn_codes_stats']))
         metadataStats = json.load(open(self.params.files['dataset_stats']))
@@ -156,8 +124,6 @@ class FMOWBaseline:
         model = get_lstm_model(self.params, codesStats)
         #model = make_parallel(model, 4)
         model.compile(optimizer=Adam(lr=self.params.lstm_adam_learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
-
-#        classWeights = np.array(json.load(open(self.params.files['class_weight'])))
 
         train_datagen = codes_metadata_generator(self.params, codesTrainData, metadataStats, codesStats)
         
@@ -167,9 +133,9 @@ class FMOWBaseline:
         callbacks_list = [checkpoint]
 
         model.fit_generator(train_datagen,
-            steps_per_epoch=(len(codesTrainData) / self.params.batch_size_lstm + 1),
-            epochs=self.params.lstm_epochs, callbacks=callbacks_list)
-#            epochs=self.params.lstm_epochs, class_weight=classWeights, callbacks=callbacks_list)
+                            steps_per_epoch=(len(codesTrainData) / self.params.batch_size_lstm + 1),
+                            epochs=self.params.lstm_epochs, callbacks=callbacks_list,
+                            max_queue_size=20)
 
         model.save(self.params.files['lstm_model'])
     
@@ -184,12 +150,10 @@ class FMOWBaseline:
         metadataStats = json.load(open(self.params.files['dataset_stats']))
         trainData = json.load(open(self.params.files['training_struct']))
         testData = json.load(open(self.params.files['test_struct']))
-        model = load_model(self.params.files['cnn_model'])
-#        model = get_cnn_model(self.params)
-#        model.load_weights('../data/working/cnn_checkpoint_weights/weights.14.hdf5')
+        #cnnModel = load_model(self.params.files['cnn_model'])
+        cnnModel = get_cnn_model(self.params)
+        featuresModel = Model(cnnModel.inputs, cnnModel.layers[-6].output)
         
-        featuresModel = Model(model.input, model.layers[-3].output)
-
         allTrainCodes = []
         
         featureDirs = ['train', 'test']
@@ -212,7 +176,7 @@ class FMOWBaseline:
 
             N = len(data)
             initBatch = True
-            for i,currData in enumerate(data):
+            for i,currData in enumerate(tqdm(data)):
                 if initBatch:
                     if N-i < self.params.batch_size_eval:
                         batchSize = 1
@@ -244,8 +208,6 @@ class FMOWBaseline:
 
                 batchIndex += 1
 
-                print(i)
-
                 if batchIndex == batchSize:
                     imgdata = imagenet_utils.preprocess_input(imgdata)
                     imgdata = imgdata / 255.0
@@ -254,6 +216,7 @@ class FMOWBaseline:
                         cnnCodes = featuresModel.predict([imgdata,metadataFeatures], batch_size=batchSize)
                     else:
                         cnnCodes = featuresModel.predict(imgdata, batch_size=batchSize)
+
                     for codeIndex,currCodes in enumerate(cnnCodes):
                         currBasePath = tmpBasePaths[codeIndex]
                         outFile = os.path.join(outDir, '%07d.json' % index)
@@ -277,7 +240,6 @@ class FMOWBaseline:
                 codesTrainData = codesData
             else:
                 codesTestData = codesData
-            
 
         N = len(allTrainCodes[0])
         sumCodes = np.zeros(N)
@@ -286,14 +248,15 @@ class FMOWBaseline:
         avgCodes = sumCodes / len(allTrainCodes)
         maxCodes = np.zeros(N)
         for currCodes in allTrainCodes:
-            maxCodes = np.maximum(maxCodes, currCodes-avgCodes)
-
+            maxCodes = np.maximum(maxCodes, np.abs(currCodes-avgCodes))
+        maxCodes[maxCodes == 0] = 1
+            
         maxTemporal = 0
         for key in codesTrainData.keys():
             currTemporal = len(codesTrainData[key]['cnn_codes_paths'])
             if currTemporal > maxTemporal:
                 maxTemporal = currTemporal
-                
+
         codesStats = {}
         codesStats['codes_mean'] = avgCodes.tolist()
         codesStats['codes_max'] = maxCodes.tolist()
@@ -301,45 +264,48 @@ class FMOWBaseline:
 
         json.dump(codesTrainData, open(self.params.files['lstm_training_struct'], 'w'))
         json.dump(codesStats, open(self.params.files['cnn_codes_stats'], 'w'))
-        
-        
+        json.dump(codesTestData, open(self.params.files['lstm_test_struct'], 'w'))
+
     def test_models(self):
+
+        codesTestData = json.load(open(self.params.files['lstm_test_struct']))
         metadataStats = json.load(open(self.params.files['dataset_stats']))
     
         metadataMean = np.array(metadataStats['metadata_mean'])
         metadataMax = np.array(metadataStats['metadata_max'])
 
         cnnModel = load_model(self.params.files['cnn_model'])
-        #cnnModel = get_cnn_model(self.params)
-        #cnnModel = make_parallel(cnnModel, 4)
-        #cnnModel.load_weights('../data/working/cnn_checkpoint_weights/weights.14.hdf5')
-        #cnnModel = cnnModel.layers[-2]
+        # cnnModel = get_cnn_model(self.params)
         
         if self.params.test_lstm:
             codesStats = json.load(open(self.params.files['cnn_codes_stats']))
-            featuresModel = Model(cnnModel.input, cnnModel.layers[-3].output)
             lstmModel = load_model(self.params.files['lstm_model'])
-#            lstmModel = get_lstm_model(self.params, codesStats)
-#            lstmModel.load_weights('../data/working/lstm_checkpoint_weights/weights.14.hdf5')
-            
+            # lstmModel = get_lstm_model(self.params, codesStats)
 
         index = 0
-        
         timestr = time.strftime("%Y%m%d-%H%M%S")
         
         if self.params.test_cnn:
             fidCNN = open(os.path.join(self.params.directories['predictions'], 'predictions-cnn-%s.txt' % timestr), 'w')
         if self.params.test_lstm:
             fidLSTM = open(os.path.join(self.params.directories['predictions'], 'predictions-lstm-%s.txt' % timestr), 'w')
+
+        def walkdir(folder):
+            for root, dirs, files in os.walk(folder):
+                if len(files) > 0:
+                    yield (root, dirs, files)
         
-        for root, dirs, files in os.walk(self.params.directories['test_data']):
+        num_sequences = 0
+        for _ in walkdir(self.params.directories['test_data']):
+            num_sequences += 1
+
+        for root, dirs, files in tqdm(walkdir(self.params.directories['test_data']), total=num_sequences):
             if len(files) > 0:
                 imgPaths = []
                 metadataPaths = []
                 slashes = [i for i,ltr in enumerate(root) if ltr == '/']
                 bbID = int(root[slashes[-1]+1:])
-                
-                
+
             for file in files:
                 if file.endswith('.jpg'):
                     imgPaths.append(os.path.join(root,file))
@@ -355,7 +321,10 @@ class FMOWBaseline:
                 currBatchSize = len(inds)
                 imgdata = np.zeros((currBatchSize, self.params.target_img_size[0], self.params.target_img_size[1], self.params.num_channels))
                 metadataFeatures = np.zeros((currBatchSize, self.params.metadata_length))
-                    
+
+                codesIndex = 0
+                codesPaths = codesTestData[root[24:]]
+                codesFeatures = []
                 for ind in inds:
                     img = image.load_img(imgPaths[ind])
                     img = image.img_to_array(img)
@@ -366,6 +335,9 @@ class FMOWBaseline:
                     features = np.divide(features - metadataMean, metadataMax)
                     metadataFeatures[ind,:] = features
                     
+                    codesFeatures.append(json.load(open(codesPaths['cnn_codes_paths'][codesIndex])))
+                    codesIndex += 1
+
                 imgdata = imagenet_utils.preprocess_input(imgdata)
                 imgdata = imgdata / 255.0
                 
@@ -376,22 +348,24 @@ class FMOWBaseline:
                         predictionsCNN = np.sum(cnnModel.predict(imgdata, batch_size=currBatchSize), axis=0)
                 
                 if self.params.test_lstm:
-                    
                     if self.params.use_metadata:
-                        codesMetadata = np.zeros((1, codesStats['max_temporal'], self.params.cnn_last_layer_length+self.params.metadata_length))
-                        currFeatures = featuresModel.predict([imgdata, metadataFeatures], batch_size=currBatchSize)
+                        # codesMetadata = np.zeros((1, codesStats['max_temporal'], self.params.cnn_seq2seq_layer_length+self.params.metadata_length))
+                        codesMetadata = np.zeros((1, codesStats['max_temporal'], self.params.cnn_lstm_layer_length+self.params.metadata_length))
                     else:
-                        codesMetadata = np.zeros((1, codesStats['max_temporal'], self.params.cnn_last_layer_length))
-                        currFeatures = featuresModel.predict(imgdata, batch_size=currBatchSize)
-                    
+                        # codesMetadata = np.zeros((1, codesStats['max_temporal'], self.params.cnn_seq2seq_layer_length))
+                        codesMetadata = np.zeros((1, codesStats['max_temporal'], self.params.cnn_lstm_layer_length))
+
+                    timestamps = []
                     for codesIndex in range(currBatchSize):
-                        metadata = metadataFeatures[codesIndex,:]
-                        cnnCodes = currFeatures[codesIndex,:]
-                        if self.params.use_metadata:
-                            codesMetadata[0,codesIndex,0:self.params.metadata_length] = metadata
-                            codesMetadata[0,codesIndex,self.params.metadata_length:] = cnnCodes
-                        else:
-                            codesMetadata[0,codesIndex,:] = cnnCodes
+                        cnnCodes = codesFeatures[codesIndex]
+                        timestamp = (cnnCodes[4]-1970)*525600 + cnnCodes[5]*12*43800 + cnnCodes[6]*31*1440 + cnnCodes[7]*60
+                        timestamps.append(timestamp)
+                        cnnCodes = np.divide(cnnCodes - np.array(codesStats['codes_mean']), np.array(codesStats['codes_max']))
+                        codesMetadata[0,codesIndex,:] = cnnCodes
+                    
+                    sortedInds = sorted(range(len(timestamps)), key=lambda k:timestamps[k])
+                    codesMetadata[0,range(len(sortedInds)),:] = codesMetadata[0,sortedInds,:]
+
                     predictionsLSTM = lstmModel.predict(codesMetadata, batch_size=1)
                 
             if len(files) > 0:
@@ -404,7 +378,6 @@ class FMOWBaseline:
                     oursLSTMStr = self.params.category_names[predLSTM]
                     fidLSTM.write('%d,%s\n' % (bbID,oursLSTMStr))
                 index += 1
-                print(index)
                 
         if self.params.test_cnn:            
             fidCNN.close()
