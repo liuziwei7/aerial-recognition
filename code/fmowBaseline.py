@@ -103,8 +103,8 @@ class FMOWBaseline:
         train_datagen = img_metadata_generator(self.params, trainData, metadataStats)
 
         print("training")
-        if self.params.use_finetune:
-            filePath = os.path.join(self.params.directories['cnn_finetune_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
+        if self.params.use_finetune and self.params.use_reweighting:
+            filePath = os.path.join(self.params.directories['cnn_finetune_reweighting_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
         else:
             filePath = os.path.join(self.params.directories['cnn_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
 
@@ -122,8 +122,8 @@ class FMOWBaseline:
                                 steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
                                 epochs=self.params.cnn_epochs, callbacks=callbacks_list)
 
-        if self.params.use_finetune:
-            model.save(self.params.files['cnn_finetune_model'])
+        if self.params.use_finetune and self.params.use_reweighting:
+            model.save(self.params.files['cnn_finetune_reweighting_model'])
         else:
             model.save(self.params.files['cnn_model'])
         
