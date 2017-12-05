@@ -122,7 +122,11 @@ class FMOWBaseline:
                                 steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
                                 epochs=self.params.cnn_epochs, callbacks=callbacks_list)
 
-        if self.params.use_finetune and self.params.use_reweighting:
+        if self.params.use_finetune and self.params.use_reweighting and self.params.use_nlm:
+            model.save(self.params.files['cnn_finetune_reweighting_nlm_model'])
+        elif self.params.use_finetune and self.params.use_reweighting and self.params.use_spp:
+            model.save(self.params.files['cnn_finetune_reweighting_spp_model'])
+        elif self.params.use_finetune and self.params.use_reweighting and ~self.params.use_nlm and ~self.params.use_spp:
             model.save(self.params.files['cnn_finetune_reweighting_model'])
         elif self.params.use_finetune and ~self.params.use_reweighting:
             model.save(self.params.files['cnn_finetune_model'])

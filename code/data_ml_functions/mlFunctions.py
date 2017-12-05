@@ -35,6 +35,7 @@ sys.path.insert(0, './DenseNet')
 import densenet
 from data_ml_functions.dataFunctions import get_batch_inds
 
+from non_local import non_local_block
 from SpatialPyramidPooling import SpatialPyramidPooling
 
 from concurrent.futures import ProcessPoolExecutor
@@ -51,6 +52,9 @@ def get_cnn_model(params):
     baseModel = densenet.DenseNetImageNet161(input_shape=(params.target_img_size[0], params.target_img_size[1], params.num_channels), include_top=False, input_tensor=input_tensor)
 
     modelStruct = baseModel.layers[-1].output
+
+    if params.use_nlm:
+        modelStruct = non_local_block(modelStruct, computation_compression=2, mode='embedded')
 
     if params.use_spp:
         modelStruct = SpatialPyramidPooling([1, 2, 4])(modelStruct)
