@@ -47,19 +47,20 @@ test_lstm = False
 
 use_finetune = True
 use_fusion = True
-use_weighting = True
+use_reweighting = True
 use_spp = False
 
 #LEARNING PARAMS
-cnn_adam_learning_rate = 1e-4
+# cnn_adam_learning_rate = 1e-4
+cnn_adam_learning_rate = 1e-5
 cnn_adam_loss = 'categorical_crossentropy'
 # cnn_epochs = 50
-cnn_epochs = 10
+cnn_epochs = 5
 	
 lstm_adam_learning_rate = 1e-4
 lstm_loss = 'categorical_crossentropy'
 # lstm_epochs = 100
-lstm_epochs = 10
+lstm_epochs = 5
 
 #DIRECTORIES AND FILES
 directories = {}
@@ -78,8 +79,8 @@ directories['lstm_checkpoint_weights'] = os.path.join(directories['working'], 'l
 
 directories['cnn_codes'] = os.path.join(directories['working'], 'cnn_codes')
 
-directories['cnn_finetune_models'] = os.path.join(directories['working'], 'cnn_finetune_models')
-directories['cnn_finetune_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_finetune_checkpoint_weights')
+directories['cnn_finetune_reweighting_models'] = os.path.join(directories['working'], 'cnn_finetune_reweighting_models')
+directories['cnn_finetune_reweighting_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_finetune_reweighting_checkpoint_weights')
 
 files = {}
 files['training_struct'] = os.path.join(directories['working'], 'training_struct.json')

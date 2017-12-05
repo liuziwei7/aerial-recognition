@@ -112,7 +112,7 @@ class FMOWBaseline:
                                      save_weights_only=False, mode='auto', period=5)
         callbacks_list = [checkpoint]
 
-        if self.params.use_weighting:
+        if self.params.use_reweighting:
             model.fit_generator(train_datagen,
                                 steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
                                 epochs=self.params.cnn_epochs, callbacks=callbacks_list,
@@ -153,7 +153,7 @@ class FMOWBaseline:
         checkpoint = ModelCheckpoint(filepath=filePath, monitor='loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
         callbacks_list = [checkpoint]
 
-        if self.params.use_weighting:
+        if self.params.use_reweighting:
             model.fit_generator(train_datagen,
                                 steps_per_epoch=(len(codesTrainData) / self.params.batch_size_lstm + 1),
                                 epochs=self.params.lstm_epochs, callbacks=callbacks_list,
