@@ -93,28 +93,39 @@ class FMOWBaseline:
         metadataStats = json.load(open(self.params.files['dataset_stats']))
 
         model = get_cnn_model(self.params)
+
+        if self.params.use_finetune:
+            model.load_weights(self.params.files['cnn_model'])
+
         #model = make_parallel(model, 4)
         model.compile(optimizer=Adam(lr=self.params.cnn_adam_learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
 
         train_datagen = img_metadata_generator(self.params, trainData, metadataStats)
 
         print("training")
-        filePath = os.path.join(self.params.directories['cnn_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
+        if self.params.use_finetune:
+            filePath = os.path.join(self.params.directories['cnn_finetune_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
+        else:
+            filePath = os.path.join(self.params.directories['cnn_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
+
         checkpoint = ModelCheckpoint(filepath=filePath, monitor='loss', verbose=0, save_best_only=False,
                                      save_weights_only=False, mode='auto', period=5)
         callbacks_list = [checkpoint]
 
-        if params.use_weighting:
+        if self.params.use_weighting:
             model.fit_generator(train_datagen,
                                 steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
                                 epochs=self.params.cnn_epochs, callbacks=callbacks_list,
-                                class_weight=params.category_weighting)
+                                class_weight=self.params.category_weighting)
         else:
             model.fit_generator(train_datagen,
                                 steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
                                 epochs=self.params.cnn_epochs, callbacks=callbacks_list)
 
-        model.save(self.params.files['cnn_model'])
+        if self.params.use_finetune:
+            model.save(self.params.files['cnn_finetune_model'])
+        else:
+            model.save(self.params.files['cnn_model'])
         
     def train_lstm(self):
         """
@@ -128,6 +139,10 @@ class FMOWBaseline:
         metadataStats = json.load(open(self.params.files['dataset_stats']))
         
         model = get_lstm_model(self.params, codesStats)
+
+        if self.params.use_finetune and ~self.params.use_fusion:
+            model.load_weights(self.params.files['lstm_model'])
+
         #model = make_parallel(model, 4)
         model.compile(optimizer=Adam(lr=self.params.lstm_adam_learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
 
@@ -138,12 +153,12 @@ class FMOWBaseline:
         checkpoint = ModelCheckpoint(filepath=filePath, monitor='loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
         callbacks_list = [checkpoint]
 
-        if params.use_weighting:
+        if self.params.use_weighting:
             model.fit_generator(train_datagen,
                                 steps_per_epoch=(len(codesTrainData) / self.params.batch_size_lstm + 1),
                                 epochs=self.params.lstm_epochs, callbacks=callbacks_list,
                                 max_queue_size=20,
-                                class_weight=params.category_weighting)
+                                class_weight=self.params.category_weighting)
         else:
             model.fit_generator(train_datagen,
                                 steps_per_epoch=(len(codesTrainData) / self.params.batch_size_lstm + 1),

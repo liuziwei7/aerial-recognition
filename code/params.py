@@ -45,6 +45,7 @@ train_lstm = False
 test_cnn = False
 test_lstm = False
 
+use_finetune = True
 use_fusion = True
 use_weighting = True
 use_spp = False
@@ -76,6 +77,9 @@ directories['cnn_checkpoint_weights'] = os.path.join(directories['working'], 'cn
 directories['lstm_checkpoint_weights'] = os.path.join(directories['working'], 'lstm_checkpoint_weights')
 
 directories['cnn_codes'] = os.path.join(directories['working'], 'cnn_codes')
+
+directories['cnn_finetune_models'] = os.path.join(directories['working'], 'cnn_finetune_models')
+directories['cnn_finetune_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_finetune_checkpoint_weights')
 
 files = {}
 files['training_struct'] = os.path.join(directories['working'], 'training_struct.json')
