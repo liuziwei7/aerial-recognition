@@ -22,12 +22,14 @@ import os
 from multiprocessing import cpu_count
 
 num_workers = cpu_count()
+num_gpus_parallel = 2
 
 use_metadata = True
 
 # batch_size_cnn = 128
-batch_size_cnn = 16
-batch_size_lstm = 512
+batch_size_cnn = 32
+# batch_size_lstm = 512
+batch_size_lstm = 128
 # batch_size_eval = 128
 batch_size_eval = 16
 metadata_length = 45

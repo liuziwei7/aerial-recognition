@@ -19,12 +19,12 @@ __author__ = 'jhuapl'
 __version__ = 0.1
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1"
 
 import sys
 
 from fmowBaseline import FMOWBaseline
-import params #params.py
+import params_gpu01 #params.py
 
 def main(argv):
     baseline = FMOWBaseline(params, argv)

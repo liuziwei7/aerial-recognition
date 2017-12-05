@@ -19,7 +19,7 @@ __author__ = 'jhuapl'
 __version__ = 0.1
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "4, 5"
 
 import sys
 

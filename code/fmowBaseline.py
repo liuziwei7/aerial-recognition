@@ -29,7 +29,7 @@ from data_ml_functions.dataFunctions import prepare_data,calculate_class_weights
 import numpy as np
 import os
 
-#from data_ml_functions.multi_gpu import make_parallel
+from data_ml_functions.multi_gpu import make_parallel
 
 from concurrent.futures import ProcessPoolExecutor
 from tqdm import tqdm
@@ -97,7 +97,7 @@ class FMOWBaseline:
         if self.params.use_finetune:
             model.load_weights(self.params.files['cnn_model'])
 
-        #model = make_parallel(model, 4)
+        model = make_parallel(model, self.params.num_gpus_parallel)
         model.compile(optimizer=Adam(lr=self.params.cnn_adam_learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
 
         train_datagen = img_metadata_generator(self.params, trainData, metadataStats)
@@ -124,6 +124,8 @@ class FMOWBaseline:
 
         if self.params.use_finetune and self.params.use_reweighting:
             model.save(self.params.files['cnn_finetune_reweighting_model'])
+        elif self.params.use_finetune and ~self.params.use_reweighting:
+            model.save(self.params.files['cnn_finetune_model'])
         else:
             model.save(self.params.files['cnn_model'])
         
@@ -143,7 +145,7 @@ class FMOWBaseline:
         if self.params.use_finetune and ~self.params.use_fusion:
             model.load_weights(self.params.files['lstm_model'])
 
-        #model = make_parallel(model, 4)
+        model = make_parallel(model, self.params.num_gpus_parallel)
         model.compile(optimizer=Adam(lr=self.params.lstm_adam_learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
 
         train_datagen = codes_metadata_generator(self.params, codesTrainData, metadataStats, codesStats)
@@ -165,8 +167,12 @@ class FMOWBaseline:
                                 epochs=self.params.lstm_epochs, callbacks=callbacks_list,
                                 max_queue_size=20)
 
-
-        model.save(self.params.files['lstm_model'])
+        if self.params.use_fusion and self.params.use_reweighting:
+            model.save(self.params.files['fusion_reweighting_model'])
+        elif self.params.use_fusion and ~self.params.use_reweighting:
+            model.save(self.params.files['fusion_model'])
+        else:
+            model.save(self.params.files['lstm_model'])
     
     def generate_cnn_codes(self):
         """
