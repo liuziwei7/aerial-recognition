@@ -57,12 +57,12 @@ use_spp = False
 cnn_adam_learning_rate = 1e-5
 cnn_adam_loss = 'categorical_crossentropy'
 # cnn_epochs = 50
-cnn_epochs = 5
+cnn_epochs = 2
 	
 lstm_adam_learning_rate = 1e-4
 lstm_loss = 'categorical_crossentropy'
 # lstm_epochs = 100
-lstm_epochs = 5
+lstm_epochs = 10
 
 #DIRECTORIES AND FILES
 directories = {}

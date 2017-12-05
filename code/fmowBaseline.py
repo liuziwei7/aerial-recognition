@@ -95,7 +95,7 @@ class FMOWBaseline:
         model = get_cnn_model(self.params)
 
         if self.params.use_finetune:
-            model.load_weights(self.params.files['cnn_model'])
+            model.load_weights(self.params.files['cnn_model'], by_name=True)
 
         model = make_parallel(model, self.params.num_gpus_parallel)
         model.compile(optimizer=Adam(lr=self.params.cnn_adam_learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
@@ -143,7 +143,7 @@ class FMOWBaseline:
         model = get_lstm_model(self.params, codesStats)
 
         if self.params.use_finetune and ~self.params.use_fusion:
-            model.load_weights(self.params.files['lstm_model'])
+            model.load_weights(self.params.files['lstm_model'], by_name=True)
 
         model = make_parallel(model, self.params.num_gpus_parallel)
         model.compile(optimizer=Adam(lr=self.params.lstm_adam_learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])

@@ -35,6 +35,8 @@ sys.path.insert(0, './DenseNet')
 import densenet
 from data_ml_functions.dataFunctions import get_batch_inds
 
+from SpatialPyramidPooling import SpatialPyramidPooling
+
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 
@@ -50,15 +52,25 @@ def get_cnn_model(params):
 
     modelStruct = baseModel.layers[-1].output
 
+    if params.use_spp:
+        modelStruct = SpatialPyramidPooling([1, 2, 4])(modelStruct)
+
     if params.use_metadata:
         auxiliary_input = Input(shape=(params.metadata_length,), name='aux_input')
         modelStruct = merge([modelStruct,auxiliary_input],'concat')
 
-    modelStruct = Dense(params.cnn_last_layer_length, activation='relu', name='fc1')(modelStruct)
-    modelStruct = Dropout(0.5)(modelStruct)
-    modelStruct = Dense(params.cnn_last_layer_length, activation='relu', name='fc2')(modelStruct)
-    modelStruct = Dropout(0.5)(modelStruct)
-    predictions = Dense(params.num_labels, activation='softmax')(modelStruct)
+    if params.use_finetune:
+        modelStruct = Dense(params.cnn_last_layer_length, activation='relu', name='fc1_finetune')(modelStruct)
+        modelStruct = Dropout(0.5)(modelStruct)
+        modelStruct = Dense(params.cnn_last_layer_length, activation='relu', name='fc2_finetune')(modelStruct)
+        modelStruct = Dropout(0.5)(modelStruct)
+        predictions = Dense(params.num_labels, activation='softmax')(modelStruct)
+    else:
+        modelStruct = Dense(params.cnn_last_layer_length, activation='relu', name='fc1')(modelStruct)
+        modelStruct = Dropout(0.5)(modelStruct)
+        modelStruct = Dense(params.cnn_last_layer_length, activation='relu', name='fc2')(modelStruct)
+        modelStruct = Dropout(0.5)(modelStruct)
+        predictions = Dense(params.num_labels, activation='softmax')(modelStruct)
 
     if not params.use_metadata:
         model = Model(input=[baseModel.input], output=predictions)
