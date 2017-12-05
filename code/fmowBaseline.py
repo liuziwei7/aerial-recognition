@@ -104,9 +104,15 @@ class FMOWBaseline:
                                      save_weights_only=False, mode='auto', period=5)
         callbacks_list = [checkpoint]
 
-        model.fit_generator(train_datagen,
-                            steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
-                            epochs=self.params.cnn_epochs, callbacks=callbacks_list)
+        if params.use_weighting:
+            model.fit_generator(train_datagen,
+                                steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
+                                epochs=self.params.cnn_epochs, callbacks=callbacks_list,
+                                class_weight=params.category_weighting)
+        else:
+            model.fit_generator(train_datagen,
+                                steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
+                                epochs=self.params.cnn_epochs, callbacks=callbacks_list)
 
         model.save(self.params.files['cnn_model'])
         
@@ -132,10 +138,18 @@ class FMOWBaseline:
         checkpoint = ModelCheckpoint(filepath=filePath, monitor='loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
         callbacks_list = [checkpoint]
 
-        model.fit_generator(train_datagen,
-                            steps_per_epoch=(len(codesTrainData) / self.params.batch_size_lstm + 1),
-                            epochs=self.params.lstm_epochs, callbacks=callbacks_list,
-                            max_queue_size=20)
+        if params.use_weighting:
+            model.fit_generator(train_datagen,
+                                steps_per_epoch=(len(codesTrainData) / self.params.batch_size_lstm + 1),
+                                epochs=self.params.lstm_epochs, callbacks=callbacks_list,
+                                max_queue_size=20,
+                                class_weight=params.category_weighting)
+        else:
+            model.fit_generator(train_datagen,
+                                steps_per_epoch=(len(codesTrainData) / self.params.batch_size_lstm + 1),
+                                epochs=self.params.lstm_epochs, callbacks=callbacks_list,
+                                max_queue_size=20)
+
 
         model.save(self.params.files['lstm_model'])
     
@@ -150,8 +164,8 @@ class FMOWBaseline:
         metadataStats = json.load(open(self.params.files['dataset_stats']))
         trainData = json.load(open(self.params.files['training_struct']))
         testData = json.load(open(self.params.files['test_struct']))
-        #cnnModel = load_model(self.params.files['cnn_model'])
-        cnnModel = get_cnn_model(self.params)
+        cnnModel = load_model(self.params.files['cnn_model'])
+        # cnnModel = get_cnn_model(self.params)
         featuresModel = Model(cnnModel.inputs, cnnModel.layers[-6].output)
         
         allTrainCodes = []

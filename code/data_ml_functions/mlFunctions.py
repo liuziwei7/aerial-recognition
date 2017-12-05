@@ -84,13 +84,16 @@ def get_lstm_model(params, codesStats):
         layerLength = params.cnn_lstm_layer_length
 
     model = Sequential()
-    model.add(LSTM(4096, return_sequences=True, input_shape=(codesStats['max_temporal'], layerLength), dropout=0.5))
-    model.add(Flatten())
+    if params.use_fusion:
+        model.add(Dense(4096, activation='relu', input_shape=(codesStats['max_temporal'], layerLength)))
+        model.add(Dropout(0.5))
+    else:
+        model.add(LSTM(4096, return_sequences=True, input_shape=(codesStats['max_temporal'], layerLength), dropout=0.5))
+        model.add(Flatten())
     model.add(Dense(512, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(params.num_labels, activation='softmax'))
     return model
-
 
 def img_metadata_generator(params, data, metadataStats):
     """

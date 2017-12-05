@@ -45,14 +45,20 @@ train_lstm = False
 test_cnn = False
 test_lstm = False
 
+use_fusion = True
+use_weighting = True
+use_spp = False
+
 #LEARNING PARAMS
 cnn_adam_learning_rate = 1e-4
 cnn_adam_loss = 'categorical_crossentropy'
-cnn_epochs = 50
+# cnn_epochs = 50
+cnn_epochs = 10
 	
 lstm_adam_learning_rate = 1e-4
-lstm_epochs = 100
 lstm_loss = 'categorical_crossentropy'
+# lstm_epochs = 100
+lstm_epochs = 10
 
 #DIRECTORIES AND FILES
 directories = {}
@@ -80,6 +86,7 @@ files['class_weight'] = os.path.join(directories['working'], 'class_weights.json
 
     
 category_names = ['false_detection', 'airport', 'airport_hangar', 'airport_terminal', 'amusement_park', 'aquaculture', 'archaeological_site', 'barn', 'border_checkpoint', 'burial_site', 'car_dealership', 'construction_site', 'crop_field', 'dam', 'debris_or_rubble', 'educational_institution', 'electric_substation', 'factory_or_powerplant', 'fire_station', 'flooded_road', 'fountain', 'gas_station', 'golf_course', 'ground_transportation_station', 'helipad', 'hospital', 'interchange', 'lake_or_pond', 'lighthouse', 'military_facility', 'multi-unit_residential', 'nuclear_powerplant', 'office_building', 'oil_or_gas_facility', 'park', 'parking_lot_or_garage', 'place_of_worship', 'police_station', 'port', 'prison', 'race_track', 'railway_bridge', 'recreational_facility', 'impoverished_settlement', 'road_bridge', 'runway', 'shipyard', 'shopping_mall', 'single-unit_residential', 'smokestack', 'solar_farm', 'space_facility', 'stadium', 'storage_tank','surface_mine', 'swimming_pool', 'toll_booth', 'tower', 'tunnel_opening', 'waste_disposal', 'water_treatment_facility', 'wind_farm', 'zoo']
+category_weighting = {0:0.6, 1:0.6, 2:1.0, 3:1.0, 4:1.0, 5:1.0, 6:1.0, 7:1.0, 8:1.4, 9:1.0, 10:1.0, 11:1.4, 12:0.6, 13:1.0, 14:0.6, 15:1.4, 16:1.0, 17:1.4, 18:1.4, 19:0.6, 20:1.0, 21:1.4, 22:1.0, 23:1.0, 24:1.0, 25:1.0, 26:1.0, 27:1.0, 28:1.0, 29:0.6, 30:1.0, 31:0.6, 32:1.0, 33:1.0, 34:1.0, 35:1.0, 36:1.0, 37:1.4, 38:1.0, 39:1.0, 40:1.0, 41:1.0, 42:1.0, 43:1.0, 44:1.4, 45:1.0, 46:1.0, 47:1.0, 48:0.6, 49:1.4, 50:0.6, 51:1.0, 52:1.0, 53:1.0, 54:1.0, 55:1.0, 56:1.0, 57:1.4, 58:0.6, 59:1.0, 60:1.0, 61:0.6, 62:1.0}
 
 num_labels = len(category_names)
 
