@@ -26,6 +26,8 @@ import sys
 from fmowBaseline import FMOWBaseline
 import params_gpu01 #params.py
 
+params = params_gpu01
+
 def main(argv):
     baseline = FMOWBaseline(params, argv)
     if baseline.params.train_cnn:
