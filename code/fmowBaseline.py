@@ -332,7 +332,7 @@ class FMOWBaseline:
             cnnModel = make_parallel(cnnModel, self.params.num_gpus_parallel, custom_objects={'tf':tf})
         elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_nlm and ~self.params.use_spp:
             cnnModel = load_model(self.params.files['cnn_finetune_reweight_model'], custom_objects={'tf':tf})
-            cnnModel = make_parallel(cnnModel, self.params.num_gpus_parallel)
+            cnnModel = cnnModel.layers[-2]
         else:
             cnnModel = load_model(self.params.files['cnn_model'])
 
