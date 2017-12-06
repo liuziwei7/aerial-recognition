@@ -24,7 +24,9 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "4, 5"
 import sys
 
 from fmowBaseline import FMOWBaseline
-import params #params.py
+import params_gpu45 #params.py
+
+params = params_gpu45
 
 def main(argv):
     baseline = FMOWBaseline(params, argv)
