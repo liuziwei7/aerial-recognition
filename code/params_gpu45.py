@@ -49,7 +49,7 @@ test_lstm = False
 
 use_finetune = True
 use_fusion = True
-use_reweighting = True
+use_reweight = True
 use_nlm = False
 use_spp = True
 
@@ -82,14 +82,14 @@ directories['lstm_checkpoint_weights'] = os.path.join(directories['working'], 'l
 
 directories['cnn_codes'] = os.path.join(directories['working'], 'cnn_codes')
 
-directories['cnn_finetune_reweighting_models'] = os.path.join(directories['working'], 'cnn_finetune_reweighting_models')
-directories['cnn_finetune_reweighting_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_finetune_reweighting_checkpoint_weights')
+directories['cnn_finetune_reweight_models'] = os.path.join(directories['working'], 'cnn_finetune_reweight_models')
+directories['cnn_finetune_reweight_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_finetune_reweight_checkpoint_weights')
 
-directories['cnn_finetune_reweighting_nlm_models'] = os.path.join(directories['working'], 'cnn_finetune_reweighting_nlm_models')
-directories['cnn_finetune_reweighting_nlm_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_finetune_reweighting_nlm_checkpoint_weights')
+directories['cnn_finetune_reweight_nlm_models'] = os.path.join(directories['working'], 'cnn_finetune_reweight_nlm_models')
+directories['cnn_finetune_reweight_nlm_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_finetune_reweight_nlm_checkpoint_weights')
 
-directories['cnn_finetune_reweighting_spp_models'] = os.path.join(directories['working'], 'cnn_finetune_reweighting_spp_models')
-directories['cnn_finetune_reweighting_spp_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_finetune_reweighting_spp_checkpoint_weights')
+directories['cnn_finetune_reweight_spp_models'] = os.path.join(directories['working'], 'cnn_finetune_reweight_spp_models')
+directories['cnn_finetune_reweight_spp_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_finetune_reweight_spp_checkpoint_weights')
 
 files = {}
 files['training_struct'] = os.path.join(directories['working'], 'training_struct.json')

@@ -75,6 +75,11 @@ class FMOWBaseline:
             self.params.files['cnn_codes_stats'] = os.path.join(self.params.directories['working'], 'cnn_codes_stats_with_metadata.json')
             self.params.files['lstm_training_struct'] = os.path.join(self.params.directories['working'], 'lstm_training_struct_with_metadata.json')
             self.params.files['lstm_test_struct'] = os.path.join(self.params.directories['working'], 'lstm_test_struct_with_metadata.json')
+        
+            self.params.files['cnn_finetune_reweight_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_models'], 'cnn_image_and_metadata.model')
+            self.params.files['cnn_finetune_reweight_nlm_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_nlm_models'], 'cnn_image_and_metadata.model')
+            self.params.files['cnn_finetune_reweight_spp_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_spp_models'], 'cnn_image_and_metadata.model')
+
         else:
             self.params.files['cnn_model'] = os.path.join(self.params.directories['cnn_models'], 'cnn_model_no_metadata.model')
             self.params.files['lstm_model'] = os.path.join(self.params.directories['lstm_models'], 'lstm_model_no_metadata.model')
@@ -103,8 +108,8 @@ class FMOWBaseline:
         train_datagen = img_metadata_generator(self.params, trainData, metadataStats)
 
         print("training")
-        if self.params.use_finetune and self.params.use_reweighting:
-            filePath = os.path.join(self.params.directories['cnn_finetune_reweighting_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
+        if self.params.use_finetune and self.params.use_reweight:
+            filePath = os.path.join(self.params.directories['cnn_finetune_reweight_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
         else:
             filePath = os.path.join(self.params.directories['cnn_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
 
@@ -112,7 +117,7 @@ class FMOWBaseline:
                                      save_weights_only=False, mode='auto', period=5)
         callbacks_list = [checkpoint]
 
-        if self.params.use_reweighting:
+        if self.params.use_reweight:
             model.fit_generator(train_datagen,
                                 steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
                                 epochs=self.params.cnn_epochs, callbacks=callbacks_list,
@@ -122,13 +127,13 @@ class FMOWBaseline:
                                 steps_per_epoch=(len(trainData) / self.params.batch_size_cnn + 1),
                                 epochs=self.params.cnn_epochs, callbacks=callbacks_list)
 
-        if self.params.use_finetune and self.params.use_reweighting and self.params.use_nlm:
-            model.save(self.params.files['cnn_finetune_reweighting_nlm_model'])
-        elif self.params.use_finetune and self.params.use_reweighting and self.params.use_spp:
-            model.save(self.params.files['cnn_finetune_reweighting_spp_model'])
-        elif self.params.use_finetune and self.params.use_reweighting and ~self.params.use_nlm and ~self.params.use_spp:
-            model.save(self.params.files['cnn_finetune_reweighting_model'])
-        elif self.params.use_finetune and ~self.params.use_reweighting:
+        if self.params.use_finetune and self.params.use_reweight and self.params.use_nlm:
+            model.save(self.params.files['cnn_finetune_reweight_nlm_model'])
+        elif self.params.use_finetune and self.params.use_reweight and self.params.use_spp:
+            model.save(self.params.files['cnn_finetune_reweight_spp_model'])
+        elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_nlm and ~self.params.use_spp:
+            model.save(self.params.files['cnn_finetune_reweight_model'])
+        elif self.params.use_finetune and ~self.params.use_reweight:
             model.save(self.params.files['cnn_finetune_model'])
         else:
             model.save(self.params.files['cnn_model'])
@@ -159,7 +164,7 @@ class FMOWBaseline:
         checkpoint = ModelCheckpoint(filepath=filePath, monitor='loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
         callbacks_list = [checkpoint]
 
-        if self.params.use_reweighting:
+        if self.params.use_reweight:
             model.fit_generator(train_datagen,
                                 steps_per_epoch=(len(codesTrainData) / self.params.batch_size_lstm + 1),
                                 epochs=self.params.lstm_epochs, callbacks=callbacks_list,
@@ -171,9 +176,9 @@ class FMOWBaseline:
                                 epochs=self.params.lstm_epochs, callbacks=callbacks_list,
                                 max_queue_size=20)
 
-        if self.params.use_fusion and self.params.use_reweighting:
-            model.save(self.params.files['fusion_reweighting_model'])
-        elif self.params.use_fusion and ~self.params.use_reweighting:
+        if self.params.use_fusion and self.params.use_reweight:
+            model.save(self.params.files['fusion_reweight_model'])
+        elif self.params.use_fusion and ~self.params.use_reweight:
             model.save(self.params.files['fusion_model'])
         else:
             model.save(self.params.files['lstm_model'])
