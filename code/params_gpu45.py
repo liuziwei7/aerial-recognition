@@ -91,6 +91,12 @@ directories['cnn_finetune_reweight_nlm_checkpoint_weights'] = os.path.join(direc
 directories['cnn_finetune_reweight_spp_models'] = os.path.join(directories['working'], 'cnn_finetune_reweight_spp_models')
 directories['cnn_finetune_reweight_spp_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_finetune_reweight_spp_checkpoint_weights')
 
+directories['lstm_finetune_models'] = os.path.join(directories['working'], 'lstm_finetune_models')
+directories['lstm_finetune_checkpoint_weights'] = os.path.join(directories['working'], 'lstm_finetune_checkpoint_weights')
+
+directories['fusion_reweight_models'] = os.path.join(directories['working'], 'fusion_reweight_models')
+directories['fusion_reweight_checkpoint_weights'] = os.path.join(directories['working'], 'fusion_reweight_checkpoint_weights')
+
 files = {}
 files['training_struct'] = os.path.join(directories['working'], 'training_struct.json')
 files['test_struct'] = os.path.join(directories['working'], 'test_struct.json')
