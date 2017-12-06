@@ -56,7 +56,7 @@ def get_cnn_model(params):
     if params.use_nlm:
         modelStruct = baseModel.layers[-2].output
         modelStruct = non_local_block(modelStruct, computation_compression=2, mode='embedded')
-        modelStruct = GlobalAveragePooling2D(modelStruct)
+        modelStruct = GlobalAveragePooling2D()(modelStruct)
 
     if params.use_spp:
         modelStruct = baseModel.layers[-2].output
