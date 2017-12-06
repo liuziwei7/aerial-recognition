@@ -133,8 +133,6 @@ class FMOWBaseline:
             model.save(self.params.files['cnn_finetune_reweight_spp_model'])
         elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_nlm and ~self.params.use_spp:
             model.save(self.params.files['cnn_finetune_reweight_model'])
-        elif self.params.use_finetune and ~self.params.use_reweight:
-            model.save(self.params.files['cnn_finetune_model'])
         else:
             model.save(self.params.files['cnn_model'])
         
@@ -178,8 +176,8 @@ class FMOWBaseline:
 
         if self.params.use_fusion and self.params.use_reweight:
             model.save(self.params.files['fusion_reweight_model'])
-        elif self.params.use_fusion and ~self.params.use_reweight:
-            model.save(self.params.files['fusion_model'])
+        elif ~self.params.use_fusion and self.params.use_finetune:
+            model.save(self.params.files['lstm_finetune_model'])
         else:
             model.save(self.params.files['lstm_model'])
     
