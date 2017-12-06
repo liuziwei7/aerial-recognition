@@ -1,3 +1,6 @@
 [submodule "code/DenseNet"]
 	path = code/DenseNet
 	url = https://github.com/titu1994/DenseNet.git
+[submodule "code/deform-conv"]
+	path = code/deform-conv
+	url = https://github.com/felixlaumon/deform-conv.git
