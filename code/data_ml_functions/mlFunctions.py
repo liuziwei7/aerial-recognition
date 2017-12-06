@@ -54,16 +54,18 @@ def get_cnn_model(params):
     modelStruct = baseModel.layers[-1].output
 
     if params.use_nlm:
+        modelStruct = baseModel.layers[-2].output
         modelStruct = non_local_block(modelStruct, computation_compression=2, mode='embedded')
 
     if params.use_spp:
+        modelStruct = baseModel.layers[-2].output
         modelStruct = SpatialPyramidPooling([1, 2, 4])(modelStruct)
 
     if params.use_metadata:
         auxiliary_input = Input(shape=(params.metadata_length,), name='aux_input')
         modelStruct = merge([modelStruct,auxiliary_input],'concat')
 
-    if params.use_finetune:
+    if params.use_nlm or params.use_spp:
         modelStruct = Dense(params.cnn_last_layer_length, activation='relu', name='fc1_finetune')(modelStruct)
         modelStruct = Dropout(0.5)(modelStruct)
         modelStruct = Dense(params.cnn_last_layer_length, activation='relu', name='fc2_finetune')(modelStruct)
