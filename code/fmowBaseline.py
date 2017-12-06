@@ -80,6 +80,9 @@ class FMOWBaseline:
             self.params.files['cnn_finetune_reweight_nlm_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_nlm_models'], 'cnn_image_and_metadata.model')
             self.params.files['cnn_finetune_reweight_spp_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_spp_models'], 'cnn_image_and_metadata.model')
 
+            self.params.files['lstm_finetune_model'] = os.path.join(self.params.directories['lstm_finetune_models'], 'lstm_image_and_metadata.model')
+            self.params.files['fusion_reweight_model'] = os.path.join(self.params.directories['fusion_reweight_models'], 'lstm_image_and_metadata.model')
+
         else:
             self.params.files['cnn_model'] = os.path.join(self.params.directories['cnn_models'], 'cnn_model_no_metadata.model')
             self.params.files['lstm_model'] = os.path.join(self.params.directories['lstm_models'], 'lstm_model_no_metadata.model')
@@ -316,13 +319,28 @@ class FMOWBaseline:
         metadataMean = np.array(metadataStats['metadata_mean'])
         metadataMax = np.array(metadataStats['metadata_max'])
 
-        cnnModel = load_model(self.params.files['cnn_model'])
+        # cnnModel = load_model(self.params.files['cnn_model'])
         # cnnModel = get_cnn_model(self.params)
+
+        if self.params.use_finetune and self.params.use_reweight and self.params.use_nlm:
+            cnnModel = load_model(self.params.files['cnn_finetune_reweight_nlm_model'])
+        elif self.params.use_finetune and self.params.use_reweight and self.params.use_spp:
+            cnnModel = load_model(self.params.files['cnn_finetune_reweight_spp_model'])
+        elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_nlm and ~self.params.use_spp:
+            cnnModel = load_model(self.params.files['cnn_finetune_reweight_model'])
+        else:
+            cnnModel = load_model(self.params.files['cnn_model'])
         
         if self.params.test_lstm:
             codesStats = json.load(open(self.params.files['cnn_codes_stats']))
-            lstmModel = load_model(self.params.files['lstm_model'])
+            # lstmModel = load_model(self.params.files['lstm_model'])
             # lstmModel = get_lstm_model(self.params, codesStats)
+            if self.params.use_fusion and self.params.use_reweight:
+                lstmModel = load_model(self.params.files['fusion_reweight_model'])
+            elif ~self.params.use_fusion and self.params.use_finetune:
+                lstmModel = load_model(self.params.files['lstm_finetune_model'])
+            else:
+                lstmModel = load_model(self.params.files['lstm_model'])
 
         index = 0
         timestr = time.strftime("%Y%m%d-%H%M%S")
