@@ -22,7 +22,7 @@ __version__ = 0.1
 import json
 from keras import backend as K
 from keras.applications import imagenet_utils
-from keras.layers import Dense,Input,merge,Flatten,Dropout,LSTM
+from keras.layers import Dense,Input,merge,Flatten,Dropout,LSTM,GlobalAveragePooling2D
 from keras.models import Sequential,Model
 from keras.preprocessing import image
 from keras.utils.np_utils import to_categorical
@@ -56,6 +56,7 @@ def get_cnn_model(params):
     if params.use_nlm:
         modelStruct = baseModel.layers[-2].output
         modelStruct = non_local_block(modelStruct, computation_compression=2, mode='embedded')
+        modelStruct = GlobalAveragePooling2D(modelStruct)
 
     if params.use_spp:
         modelStruct = baseModel.layers[-2].output
