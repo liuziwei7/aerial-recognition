@@ -29,8 +29,6 @@ from data_ml_functions.dataFunctions import prepare_data,calculate_class_weights
 import numpy as np
 import os
 
-import tensorflow as tf
-
 from data_ml_functions.multi_gpu import make_parallel
 
 from concurrent.futures import ProcessPoolExecutor
@@ -326,12 +324,12 @@ class FMOWBaseline:
 
         if self.params.use_finetune and self.params.use_reweight and self.params.use_nlm:
             cnnModel = load_model(self.params.files['cnn_finetune_reweight_nlm_model'])
-            cnnModel = make_parallel(cnnModel, self.params.num_gpus_parallel, custom_objects={'tf':tf})
+            cnnModel = cnnModel.layers[-2]
         elif self.params.use_finetune and self.params.use_reweight and self.params.use_spp:
             cnnModel = load_model(self.params.files['cnn_finetune_reweight_spp_model'])
-            cnnModel = make_parallel(cnnModel, self.params.num_gpus_parallel, custom_objects={'tf':tf})
+            cnnModel = cnnModel.layers[-2]
         elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_nlm and ~self.params.use_spp:
-            cnnModel = load_model(self.params.files['cnn_finetune_reweight_model'], custom_objects={'tf':tf})
+            cnnModel = load_model(self.params.files['cnn_finetune_reweight_model'])
             cnnModel = cnnModel.layers[-2]
         else:
             cnnModel = load_model(self.params.files['cnn_model'])
