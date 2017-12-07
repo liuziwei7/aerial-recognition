@@ -30,7 +30,7 @@ import numpy as np
 import os
 
 import tensorflow as tf
-from SpatialPyramidPooling import SpatialPyramidPooling
+from data_ml_functions.SpatialPyramidPooling import SpatialPyramidPooling
 
 from data_ml_functions.multi_gpu import make_parallel
 
