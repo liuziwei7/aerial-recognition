@@ -29,18 +29,14 @@ from keras.utils.np_utils import to_categorical
 
 import numpy as np
 
-# from .DenseNet import densenet
 import sys
 sys.path.insert(0, './DenseNet')
-import densenet
-
-# from ./deform-conv import 
-import sys
 sys.path.insert(0, './DeformConv')
-from deform_conv.layers import ConvOffset2D
 
+import densenet
 from non_local import non_local_block
 from SpatialPyramidPooling import SpatialPyramidPooling
+from deform_conv.layers import ConvOffset2D
 
 from data_ml_functions.dataFunctions import get_batch_inds
 

@@ -30,6 +30,7 @@ import numpy as np
 import os
 
 import tensorflow as tf
+from SpatialPyramidPooling import SpatialPyramidPooling
 
 from data_ml_functions.multi_gpu import make_parallel
 
@@ -331,7 +332,7 @@ class FMOWBaseline:
             cnnModel = load_model(self.params.files['cnn_finetune_reweight_nlm_model'], custom_objects={'tf':tf})
             cnnModel = cnnModel.layers[-2]
         elif self.params.use_finetune and self.params.use_reweight and self.params.use_spp:
-            cnnModel = load_model(self.params.files['cnn_finetune_reweight_spp_model'], custom_objects={'tf':tf})
+            cnnModel = load_model(self.params.files['cnn_finetune_reweight_spp_model'], custom_objects={'tf':tf, 'SpatialPyramidPooling':SpatialPyramidPooling})
             cnnModel = cnnModel.layers[-2]
         elif self.params.use_finetune and self.params.use_reweight and self.params.use_deform:
             cnnModel = load_model(self.params.files['cnn_finetune_reweight_deform_model'], custom_objects={'tf':tf})
