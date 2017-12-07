@@ -39,6 +39,8 @@ from tqdm import tqdm
 
 import time
 
+import pdb
+
 class FMOWBaseline:
     def __init__(self, params=None, argv=None):
         """
@@ -201,8 +203,27 @@ class FMOWBaseline:
         metadataStats = json.load(open(self.params.files['dataset_stats']))
         trainData = json.load(open(self.params.files['training_struct']))
         testData = json.load(open(self.params.files['test_struct']))
-        cnnModel = load_model(self.params.files['cnn_model'])
+        
+        # cnnModel = load_model(self.params.files['cnn_model'])
         # cnnModel = get_cnn_model(self.params)
+        
+        if self.params.use_finetune and self.params.use_reweight and self.params.use_nlm:
+            cnnModel = load_model(self.params.files['cnn_finetune_reweight_nlm_model'], custom_objects={'tf':tf})
+            cnnModel = cnnModel.layers[-2]
+        elif self.params.use_finetune and self.params.use_reweight and self.params.use_spp:
+            cnnModel = load_model(self.params.files['cnn_finetune_reweight_spp_model'], custom_objects={'tf':tf, 'SpatialPyramidPooling':SpatialPyramidPooling})
+            cnnModel = cnnModel.layers[-2]
+        elif self.params.use_finetune and self.params.use_reweight and self.params.use_deform:
+            cnnModel = load_model(self.params.files['cnn_finetune_reweight_deform_model'], custom_objects={'tf':tf})
+            cnnModel = cnnModel.layers[-2]
+        elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_nlm and ~self.params.use_spp and ~self.params.use_deform:
+            cnnModel = load_model(self.params.files['cnn_finetune_reweight_model'], custom_objects={'tf':tf})
+            cnnModel = cnnModel.layers[-2]
+        else:
+            cnnModel = load_model(self.params.files['cnn_model'])
+
+        pdb.set_trace()
+
         featuresModel = Model(cnnModel.inputs, cnnModel.layers[-6].output)
         
         allTrainCodes = []
