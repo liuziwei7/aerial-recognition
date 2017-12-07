@@ -39,8 +39,6 @@ from tqdm import tqdm
 
 import time
 
-import pdb
-
 class FMOWBaseline:
     def __init__(self, params=None, argv=None):
         """
@@ -221,8 +219,6 @@ class FMOWBaseline:
             cnnModel = cnnModel.layers[-2]
         else:
             cnnModel = load_model(self.params.files['cnn_model'])
-
-        pdb.set_trace()
 
         featuresModel = Model(cnnModel.inputs, cnnModel.layers[-6].output)
         
