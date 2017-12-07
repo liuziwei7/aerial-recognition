@@ -85,7 +85,7 @@ def get_cnn_model(params):
         auxiliary_input = Input(shape=(params.metadata_length,), name='aux_input')
         modelStruct = merge([modelStruct,auxiliary_input],'concat')
 
-    if params.use_nlm or params.use_spp or params.use_deform:
+    if params.use_spp:
         modelStruct = Dense(params.cnn_last_layer_length, activation='relu', name='fc1_finetune')(modelStruct)
         modelStruct = Dropout(0.5)(modelStruct)
         modelStruct = Dense(params.cnn_last_layer_length, activation='relu', name='fc2_finetune')(modelStruct)
