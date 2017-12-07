@@ -186,8 +186,7 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
             height_shift_range=0.2,
             shear_range=0.2,
             zoom_range=0.2,
-            horizontal_flip=False,
-            dim_ordering='tf',
+            horizontal_flip=True,
             fill_mode='nearest')
         datagen.fit(imgdata)
         tmp = datagen.flow(imgdata, batch_size=len(results))
