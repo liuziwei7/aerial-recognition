@@ -81,6 +81,7 @@ class FMOWBaseline:
             self.params.files['cnn_finetune_reweight_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_models'], 'cnn_image_and_metadata.model')
             self.params.files['cnn_finetune_reweight_nlm_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_nlm_models'], 'cnn_image_and_metadata.model')
             self.params.files['cnn_finetune_reweight_spp_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_spp_models'], 'cnn_image_and_metadata.model')
+            self.params.files['cnn_finetune_reweight_deform_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_deform_models'], 'cnn_image_and_metadata.model')
 
             self.params.files['lstm_finetune_model'] = os.path.join(self.params.directories['lstm_finetune_models'], 'lstm_image_and_metadata.model')
             self.params.files['fusion_reweight_model'] = os.path.join(self.params.directories['fusion_reweight_models'], 'lstm_image_and_metadata.model')
@@ -136,7 +137,9 @@ class FMOWBaseline:
             model.save(self.params.files['cnn_finetune_reweight_nlm_model'])
         elif self.params.use_finetune and self.params.use_reweight and self.params.use_spp:
             model.save(self.params.files['cnn_finetune_reweight_spp_model'])
-        elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_nlm and ~self.params.use_spp:
+        elif self.params.use_finetune and self.params.use_reweight and self.params.use_deform:
+            model.save(self.params.files['cnn_finetune_reweight_deform_model'])
+        elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_nlm and ~self.params.use_spp and ~self.params.use_deform:
             model.save(self.params.files['cnn_finetune_reweight_model'])
         else:
             model.save(self.params.files['cnn_model'])
@@ -330,7 +333,10 @@ class FMOWBaseline:
         elif self.params.use_finetune and self.params.use_reweight and self.params.use_spp:
             cnnModel = load_model(self.params.files['cnn_finetune_reweight_spp_model'], custom_objects={'tf':tf})
             cnnModel = cnnModel.layers[-2]
-        elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_nlm and ~self.params.use_spp:
+        elif self.params.use_finetune and self.params.use_reweight and self.params.use_deform:
+            cnnModel = load_model(self.params.files['cnn_finetune_reweight_deform_model'], custom_objects={'tf':tf})
+            cnnModel = cnnModel.layers[-2]
+        elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_nlm and ~self.params.use_spp and ~self.params.use_deform:
             cnnModel = load_model(self.params.files['cnn_finetune_reweight_model'], custom_objects={'tf':tf})
             cnnModel = cnnModel.layers[-2]
         else:

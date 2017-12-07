@@ -52,6 +52,7 @@ use_fusion = True
 use_reweight = True
 use_nlm = True
 use_spp = False
+use_deform = False
 
 #LEARNING PARAMS
 # cnn_adam_learning_rate = 1e-4
@@ -90,6 +91,9 @@ directories['cnn_finetune_reweight_nlm_checkpoint_weights'] = os.path.join(direc
 
 directories['cnn_finetune_reweight_spp_models'] = os.path.join(directories['working'], 'cnn_finetune_reweight_spp_models')
 directories['cnn_finetune_reweight_spp_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_finetune_reweight_spp_checkpoint_weights')
+
+directories['cnn_finetune_reweight_deform_models'] = os.path.join(directories['working'], 'cnn_finetune_reweight_deform_models')
+directories['cnn_finetune_reweight_deform_checkpoint_weights'] = os.path.join(directories['working'], 'cnn_finetune_reweight_deform_checkpoint_weights')
 
 directories['lstm_finetune_models'] = os.path.join(directories['working'], 'lstm_finetune_models')
 directories['lstm_finetune_checkpoint_weights'] = os.path.join(directories['working'], 'lstm_finetune_checkpoint_weights')

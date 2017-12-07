@@ -22,7 +22,7 @@ __version__ = 0.1
 import json
 from keras import backend as K
 from keras.applications import imagenet_utils
-from keras.layers import Dense,Input,merge,Flatten,Dropout,LSTM,GlobalAveragePooling2D
+from keras.layers import Dense,Input,merge,Flatten,Dropout,LSTM,Conv2D,GlobalAveragePooling2D
 from keras.models import Sequential,Model
 from keras.preprocessing import image
 from keras.utils.np_utils import to_categorical
@@ -33,10 +33,16 @@ import numpy as np
 import sys
 sys.path.insert(0, './DenseNet')
 import densenet
-from data_ml_functions.dataFunctions import get_batch_inds
+
+# from ./deform-conv import 
+import sys
+sys.path.insert(0, './deform-conv')
+from deform-conv.deform_conv.layers import ConvOffset2D
 
 from non_local import non_local_block
 from SpatialPyramidPooling import SpatialPyramidPooling
+
+from data_ml_functions.dataFunctions import get_batch_inds
 
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
@@ -55,12 +61,23 @@ def get_cnn_model(params):
 
     if params.use_nlm:
         modelStruct = baseModel.layers[-2].output
-        modelStruct = non_local_block(modelStruct, computation_compression=2, mode='embedded')
-        modelStruct = GlobalAveragePooling2D()(modelStruct)
+        modelStruct = non_local_block(modelStruct, computation_compression=1, mode='embedded')
+        modelStruct = Conv2D(params.cnn_lstm_layer_length, [3, 3], name='conv_nlm')(modelStruct)
+        modelStruct = Dense(params.cnn_lstm_layer_length, activation='relu', name='fc_nlm')(modelStruct)
+        modelStruct = Dropout(0.5)(modelStruct)
 
     if params.use_spp:
         modelStruct = baseModel.layers[-2].output
-        modelStruct = SpatialPyramidPooling([1, 2, 4])(modelStruct)
+        modelStruct = SpatialPyramidPooling([1, 2, 4], name='spp')(modelStruct)
+        # modelStruct = Dense(params.cnn_lstm_layer_length, activation='relu', name='fc_spp')(modelStruct)
+        # modelStruct = Dropout(0.5)(modelStruct)
+
+    if params.use_deform:
+        modelStruct = baseModel.layers[-2].output
+        modelStruct = ConvOffset2D(params.cnn_lstm_layer_length, name='deform')(modelStruct)
+        modelStruct = Conv2D(params.cnn_lstm_layer_length, [3, 3], name='conv_deform')(modelStruct)
+        modelStruct = Dense(params.cnn_lstm_layer_length, activation='relu', name='fc_deform')(modelStruct)
+        modelStruct = Dropout(0.5)(modelStruct)
 
     if params.use_metadata:
         auxiliary_input = Input(shape=(params.metadata_length,), name='aux_input')
