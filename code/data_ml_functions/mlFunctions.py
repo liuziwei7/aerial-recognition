@@ -43,6 +43,8 @@ from data_ml_functions.dataFunctions import get_batch_inds
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 
+import pdb
+
 def get_cnn_model(params):   
     """
     Load base CNN model and add metadata fusion layers if 'use_metadata' is set in params.py
@@ -176,6 +178,21 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
         metadata[i, :] = result['metadata']
         imgdata[i, :, :, :] = result['img']
         labels[i] = result['labels']
+
+    if params.use_aug:
+        datagen = image.ImageDataGenerator(
+            rotation_range=40,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=False,
+            dim_ordering='tf',
+            fill_mode='nearest')
+        datagen.fit(imgdata)
+        tmp = datagen.flow(imgdata, batch_size=len(results))
+
+        pdb.set_trace()
 
     imgdata = imagenet_utils.preprocess_input(imgdata)
     imgdata = imgdata / 255.0
