@@ -36,8 +36,8 @@ import densenet
 
 # from ./deform-conv import 
 import sys
-sys.path.insert(0, './deform-conv')
-from deform-conv.deform_conv.layers import ConvOffset2D
+sys.path.insert(0, './DeformConv')
+from deform_conv.layers import ConvOffset2D
 
 from non_local import non_local_block
 from SpatialPyramidPooling import SpatialPyramidPooling
