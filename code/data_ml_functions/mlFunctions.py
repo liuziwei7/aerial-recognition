@@ -63,7 +63,7 @@ def get_cnn_model(params):
         modelStruct = baseModel.layers[-2].output
         modelStruct = non_local_block(modelStruct, computation_compression=1, mode='embedded')
         modelStruct = Conv2D(params.cnn_lstm_layer_length, [3, 3], name='conv_nlm')(modelStruct)
-        modelStruct = Flatten(modelStruct)
+        modelStruct = Flatten()(modelStruct)
         modelStruct = Dense(params.cnn_lstm_layer_length, activation='relu', name='fc_nlm')(modelStruct)
         modelStruct = Dropout(0.5)(modelStruct)
 
@@ -77,7 +77,7 @@ def get_cnn_model(params):
         modelStruct = baseModel.layers[-2].output
         modelStruct = ConvOffset2D(params.cnn_lstm_layer_length, name='deform')(modelStruct)
         modelStruct = Conv2D(params.cnn_lstm_layer_length, [3, 3], name='conv_deform')(modelStruct)
-        modelStruct = Flatten(modelStruct)
+        modelStruct = Flatten()(modelStruct)
         modelStruct = Dense(params.cnn_lstm_layer_length, activation='relu', name='fc_deform')(modelStruct)
         modelStruct = Dropout(0.5)(modelStruct)
 
