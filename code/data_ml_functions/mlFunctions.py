@@ -180,12 +180,11 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
         imgdata[i, :, :, :] = result['img']
         labels[i] = result['labels']
 
-    img_0 = imgdata[0, :, :, :]
-    img_0 = image.array_to_img(img_0)
-    img_0.save(os.path.join('/home/zwliu/preview/', '0.jpg'))
-    img_1 = imgdata[1, :, :, :]
-    img_1 = image.array_to_img(img_1)
-    img_0.save(os.path.join('/home/zwliu/preview/', '1.jpg'))
+    for i in len(results):
+        img_cur = imgdata[i, :, :, :]
+        img_cur = image.array_to_img(img_cur)
+        img_cur.save(os.path.join('/home/zwliu/preview/', str(i), '.jpg'))
+    
     pdb.set_trace()
 
     if params.use_aug:
@@ -201,12 +200,11 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
             imgdata = imgdata_aug
             break;
 
-    img_0 = imgdata[0, :, :, :]
-    img_0 = image.array_to_img(img_0)
-    img_0.save(os.path.join('/home/zwliu/preview/', '0_aug.jpg'))
-    img_1 = imgdata[1, :, :, :]
-    img_1 = image.array_to_img(img_1)
-    img_0.save(os.path.join('/home/zwliu/preview/', '1_aug.jpg'))
+    for i in len(results):
+        img_cur = imgdata[i, :, :, :]
+        img_cur = image.array_to_img(img_cur)
+        img_cur.save(os.path.join('/home/zwliu/preview/', str(i), '.jpg'))
+
     pdb.set_trace()
 
     imgdata = imagenet_utils.preprocess_input(imgdata)
