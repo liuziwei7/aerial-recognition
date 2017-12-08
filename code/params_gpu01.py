@@ -65,8 +65,7 @@ cnn_epochs = 2
 	
 lstm_adam_learning_rate = 1e-4
 lstm_loss = 'categorical_crossentropy'
-# lstm_epochs = 100
-lstm_epochs = 10
+lstm_epochs = 100
 
 #DIRECTORIES AND FILES
 directories = {}
