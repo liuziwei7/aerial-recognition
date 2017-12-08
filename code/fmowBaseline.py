@@ -158,8 +158,8 @@ class FMOWBaseline:
         codesStats = json.load(open(self.params.files['cnn_codes_stats']))
         metadataStats = json.load(open(self.params.files['dataset_stats']))
         
-        model = get_lstm_model(self.params, codesStats)
-
+        # model = get_lstm_model(self.params, codesStats)
+        model.load_model(self.params.files['lstm_model'])
         pdb.set_trace()
 
         if self.params.use_finetune and ~self.params.use_fusion:

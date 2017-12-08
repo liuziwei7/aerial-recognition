@@ -179,6 +179,12 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
         imgdata[i, :, :, :] = result['img']
         labels[i] = result['labels']
 
+    img_0 = imgdata[0, :, :, :]
+    img_0 = image.array_to_img(img_0)
+    img_0.save('~/preview/0.jpg')
+    img_1 = imgdata[1, :, :, :]
+    img_1 = image.array_to_img(img_1)
+    img_1.save('~/preview/1.jpg')
     pdb.set_trace()
 
     if params.use_aug:
@@ -194,7 +200,13 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
             imgdata = imgdata_aug
             break;
 
-        pdb.set_trace()
+    img_0 = imgdata[0, :, :, :]
+    img_0 = image.array_to_img(img_0)
+    img_0.save('~/preview/0_aug.jpg')
+    img_1 = imgdata[1, :, :, :]
+    img_1 = image.array_to_img(img_1)
+    img_1.save('~/preview/1_aug.jpg')
+    pdb.set_trace()
 
     imgdata = imagenet_utils.preprocess_input(imgdata)
     imgdata = imgdata / 255.0
