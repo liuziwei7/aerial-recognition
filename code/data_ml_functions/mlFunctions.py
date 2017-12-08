@@ -188,8 +188,9 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
             zoom_range=0.2,
             horizontal_flip=True,
             fill_mode='nearest')
-        datagen.fit(imgdata)
-        tmp = datagen.flow(imgdata, batch_size=len(results))
+        for imgdata_aug in datagen.flow(imgdata, batch_size=len(results), save_to_dir='~/preview', save_prefix='fmow', save_format='jpeg'):
+            imgdata = imgdata_aug
+            break;
 
         pdb.set_trace()
 
