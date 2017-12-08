@@ -115,7 +115,9 @@ def get_lstm_model(params, codesStats):
 
     model = Sequential()
     if params.use_fusion:
-        model.add(Dense(4096, activation='relu', input_shape=(codesStats['max_temporal'], layerLength)))
+        model.add(InputLayer(input_shape=(codesStats['max_temporal'], layerLength)))
+        model.add(Flatten())
+        model.add(Dense(4096, activation='relu'))
         model.add(Dropout(0.5))
     else:
         model.add(LSTM(4096, return_sequences=True, input_shape=(codesStats['max_temporal'], layerLength), dropout=0.5))
@@ -180,7 +182,7 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
         imgdata[i, :, :, :] = result['img']
         labels[i] = result['labels']
 
-    for i in len(results):
+    for i in range(0, len(results)):
         img_cur = imgdata[i, :, :, :]
         img_cur = image.array_to_img(img_cur)
         img_cur.save(os.path.join('/home/zwliu/preview/', str(i), '.jpg'))
@@ -200,7 +202,7 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
             imgdata = imgdata_aug
             break;
 
-    for i in len(results):
+    for i in range(0, len(results)):
         img_cur = imgdata[i, :, :, :]
         img_cur = image.array_to_img(img_cur)
         img_cur.save(os.path.join('/home/zwliu/preview/', str(i), '.jpg'))
