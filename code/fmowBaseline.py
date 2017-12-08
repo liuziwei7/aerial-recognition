@@ -158,12 +158,10 @@ class FMOWBaseline:
         codesStats = json.load(open(self.params.files['cnn_codes_stats']))
         metadataStats = json.load(open(self.params.files['dataset_stats']))
         
-        # model = get_lstm_model(self.params, codesStats)
-        model = load_model(self.params.files['lstm_model'])
-        pdb.set_trace()
-
+        model = get_lstm_model(self.params, codesStats)
+        
         if self.params.use_finetune and ~self.params.use_fusion:
-            model.load_weights(self.params.files['lstm_model'], by_name=True)
+            model.load_weights(self.params.files['lstm_model'])
 
         model = make_parallel(model, self.params.num_gpus_parallel)
         model.compile(optimizer=Adam(lr=self.params.lstm_adam_learning_rate), loss='categorical_crossentropy', metrics=['accuracy'])
