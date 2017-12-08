@@ -52,7 +52,7 @@ use_fusion = True
 use_reweight = True
 use_aug = False
 
-use_nlm = True
+use_nlm = False
 use_spp = False
 use_deform = False
 
