@@ -367,9 +367,11 @@ class FMOWBaseline:
             # lstmModel = load_model(self.params.files['lstm_model'])
             # lstmModel = get_lstm_model(self.params, codesStats)
             if self.params.use_fusion and self.params.use_reweight:
-                lstmModel = load_model(self.params.files['fusion_reweight_model'])
+                lstmModel = load_model(self.params.files['fusion_reweight_model'], custom_objects={'tf':tf})
+                lstmModel = lstmModel.layers[-2]
             elif ~self.params.use_fusion and self.params.use_finetune:
-                lstmModel = load_model(self.params.files['lstm_finetune_model'])
+                lstmModel = load_model(self.params.files['lstm_finetune_model'], custom_objects={'tf':tf})
+                lstmModel = lstmModel.layers[-2]
             else:
                 lstmModel = load_model(self.params.files['lstm_model'])
 
