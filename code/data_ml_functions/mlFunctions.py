@@ -205,7 +205,7 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
     for i in range(0, len(results)):
         img_cur = imgdata[i, :, :, :]
         img_cur = image.array_to_img(img_cur)
-        img_cur.save('/home/zwliu/preview/' + str(i) + '.jpg')
+        img_cur.save('/home/zwliu/preview/' + str(i) + '_aug.jpg')
 
     pdb.set_trace()
 
