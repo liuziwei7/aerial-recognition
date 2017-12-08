@@ -48,7 +48,7 @@ test_cnn = False
 test_lstm = False
 
 use_finetune = True
-use_fusion = True
+use_fusion = False
 use_reweight = True
 use_aug = False
 

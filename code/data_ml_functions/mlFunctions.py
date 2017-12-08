@@ -188,7 +188,7 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
             zoom_range=0.2,
             horizontal_flip=True,
             fill_mode='nearest')
-        for imgdata_aug in datagen.flow(imgdata, batch_size=len(results), save_to_dir='~/preview', save_prefix='fmow', save_format='jpeg'):
+        for imgdata_aug in datagen.flow(imgdata, batch_size=len(results)):
             imgdata = imgdata_aug
             break;
 
