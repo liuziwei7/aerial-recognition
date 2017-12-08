@@ -182,12 +182,10 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
         imgdata[i, :, :, :] = result['img']
         labels[i] = result['labels']
 
-    for i in range(0, len(results)):
-        img_cur = imgdata[i, :, :, :]
-        img_cur = image.array_to_img(img_cur)
-        img_cur.save('/home/zwliu/preview/' + str(i) + '.jpg')
-    
-    pdb.set_trace()
+    # for i in range(0, len(results)):
+    #     img_cur = imgdata[i, :, :, :]
+    #     img_cur = image.array_to_img(img_cur)
+    #     img_cur.save('/home/zwliu/preview/' + str(i) + '.jpg')
 
     if params.use_aug and params.train_cnn:
         datagen = image.ImageDataGenerator(
@@ -204,12 +202,12 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
             imgdata = imgdata_aug
             break;
 
-    for i in range(0, len(results)):
-        img_cur = imgdata[i, :, :, :]
-        img_cur = image.array_to_img(img_cur)
-        img_cur.save('/home/zwliu/preview/' + str(i) + '_aug.jpg')
+    # for i in range(0, len(results)):
+    #     img_cur = imgdata[i, :, :, :]
+    #     img_cur = image.array_to_img(img_cur)
+    #     img_cur.save('/home/zwliu/preview/' + str(i) + '_aug.jpg')
 
-    pdb.set_trace()
+    # pdb.set_trace()
 
     imgdata = imagenet_utils.preprocess_input(imgdata)
     imgdata = imgdata / 255.0

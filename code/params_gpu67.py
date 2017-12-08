@@ -48,7 +48,7 @@ test_cnn = False
 test_lstm = False
 
 use_finetune = True
-use_fusion = True
+use_fusion = False
 use_reweight = True
 use_aug = True
 
@@ -57,16 +57,14 @@ use_spp = False
 use_deform = False
 
 #LEARNING PARAMS
-# cnn_adam_learning_rate = 1e-4
-cnn_adam_learning_rate = 1e-5
+cnn_adam_learning_rate = 1e-4
 cnn_adam_loss = 'categorical_crossentropy'
 # cnn_epochs = 50
-cnn_epochs = 2
+cnn_epochs = 20
 	
 lstm_adam_learning_rate = 1e-4
 lstm_loss = 'categorical_crossentropy'
-# lstm_epochs = 100
-lstm_epochs = 10
+lstm_epochs = 100
 
 #DIRECTORIES AND FILES
 directories = {}
