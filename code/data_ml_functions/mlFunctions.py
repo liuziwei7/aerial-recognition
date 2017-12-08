@@ -43,6 +43,7 @@ from data_ml_functions.dataFunctions import get_batch_inds
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 
+import os
 import pdb
 
 def get_cnn_model(params):   
