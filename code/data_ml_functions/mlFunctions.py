@@ -192,11 +192,11 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
     if params.use_aug:
         datagen = image.ImageDataGenerator(
             rotation_range=60,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            zoom_range=0.2,
-            shear_range=0.1,
-            channel_shift_range=0.1,
+            width_shift_range=0.1,
+            height_shift_range=0.1,
+            zoom_range=0.1,
+            shear_range=0.05,
+            channel_shift_range=0.05,
             horizontal_flip=True,
             vertical_flip=True,
             fill_mode='nearest')

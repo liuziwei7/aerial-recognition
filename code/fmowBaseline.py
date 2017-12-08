@@ -117,7 +117,9 @@ class FMOWBaseline:
         train_datagen = img_metadata_generator(self.params, trainData, metadataStats)
 
         print("training")
-        if self.params.use_finetune and self.params.use_reweight:
+        if self.params.use_finetune and self.params.use_reweight and self.params.use_aug:
+            filePath = os.path.join(self.params.directories['cnn_finetune_reweight_aug_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
+        elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_aug:
             filePath = os.path.join(self.params.directories['cnn_finetune_reweight_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
         else:
             filePath = os.path.join(self.params.directories['cnn_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
@@ -142,7 +144,9 @@ class FMOWBaseline:
             model.save(self.params.files['cnn_finetune_reweight_spp_model'])
         elif self.params.use_finetune and self.params.use_reweight and self.params.use_deform:
             model.save(self.params.files['cnn_finetune_reweight_deform_model'])
-        elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_nlm and ~self.params.use_spp and ~self.params.use_deform:
+        elif self.params.use_finetune and self.params.use_reweight and self.params.use_aug:
+            model.save(self.params.files['cnn_finetune_reweight_aug_model'])
+        elif self.params.use_finetune and self.params.use_reweight and ~self.params.use_nlm and ~self.params.use_spp and ~self.params.use_deform and ~self.params.use_aug:
             model.save(self.params.files['cnn_finetune_reweight_model'])
         else:
             model.save(self.params.files['cnn_model'])
@@ -169,8 +173,14 @@ class FMOWBaseline:
         train_datagen = codes_metadata_generator(self.params, codesTrainData, metadataStats, codesStats)
         
         print("training")
-        filePath = os.path.join(self.params.directories['lstm_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
-        checkpoint = ModelCheckpoint(filepath=filePath, monitor='loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
+        if self.params.use_fusion and self.params.use_reweight:
+            filePath = os.path.join(self.params.directories['fusion_reweight_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
+        elif ~self.params.use_fusion and self.params.use_finetune:
+            filePath = os.path.join(self.params.directories['lstm_finetune_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
+        else:
+            filePath = os.path.join(self.params.directories['lstm_checkpoint_weights'], 'weights.{epoch:02d}.hdf5')
+
+        checkpoint = ModelCheckpoint(filepath=filePath, monitor='loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=10)
         callbacks_list = [checkpoint]
 
         if self.params.use_reweight:
