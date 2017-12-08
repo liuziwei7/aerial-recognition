@@ -189,7 +189,7 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
     
     pdb.set_trace()
 
-    if params.use_aug:
+    if params.use_aug and params.train_cnn:
         datagen = image.ImageDataGenerator(
             rotation_range=60,
             width_shift_range=0.1,
