@@ -22,7 +22,7 @@ __version__ = 0.1
 import json
 from keras import backend as K
 from keras.applications import imagenet_utils
-from keras.layers import Dense,Input,merge,Flatten,Dropout,LSTM,Conv2D,GlobalAveragePooling2D
+from keras.layers import Dense,Input,merge,Flatten,Dropout,LSTM,InputLayer,Conv2D,GlobalAveragePooling2D
 from keras.models import Sequential,Model
 from keras.preprocessing import image
 from keras.utils.np_utils import to_categorical
