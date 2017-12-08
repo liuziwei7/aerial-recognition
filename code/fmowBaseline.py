@@ -39,6 +39,8 @@ from tqdm import tqdm
 
 import time
 
+import pdb
+
 class FMOWBaseline:
     def __init__(self, params=None, argv=None):
         """
@@ -157,6 +159,8 @@ class FMOWBaseline:
         metadataStats = json.load(open(self.params.files['dataset_stats']))
         
         model = get_lstm_model(self.params, codesStats)
+
+        pdb.set_trace()
 
         if self.params.use_finetune and ~self.params.use_fusion:
             model.load_weights(self.params.files['lstm_model'], by_name=True)

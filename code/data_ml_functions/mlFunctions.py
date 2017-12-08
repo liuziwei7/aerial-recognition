@@ -179,6 +179,8 @@ def load_cnn_batch(params, batchData, metadataStats, executor):
         imgdata[i, :, :, :] = result['img']
         labels[i] = result['labels']
 
+    pdb.set_trace()
+
     if params.use_aug:
         datagen = image.ImageDataGenerator(
             rotation_range=40,
