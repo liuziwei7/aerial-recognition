@@ -47,9 +47,9 @@ train_lstm = False
 test_cnn = False
 test_lstm = False
 
-use_finetune = False
+use_finetune = True
 use_fusion = False
-use_reweight = False
+use_reweight = True
 use_aug = False
 
 use_nlm = False
