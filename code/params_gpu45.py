@@ -21,7 +21,7 @@ __version__ = 0.1
 import os
 from multiprocessing import cpu_count
 
-num_workers = cpu_count() / 2
+num_workers = cpu_count()
 num_gpus_parallel = 2
 
 use_metadata = True
@@ -47,13 +47,13 @@ train_lstm = False
 test_cnn = False
 test_lstm = False
 
-use_finetune = True
-use_fusion = True
-use_reweight = True
+use_finetune = False
+use_fusion = False
+use_reweight = False
 use_aug = False
 
 use_nlm = False
-use_spp = True
+use_spp = False
 use_deform = False
 
 #LEARNING PARAMS
