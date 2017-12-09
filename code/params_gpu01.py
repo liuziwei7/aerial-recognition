@@ -21,7 +21,7 @@ __version__ = 0.1
 import os
 from multiprocessing import cpu_count
 
-num_workers = cpu_count() / 2
+num_workers = cpu_count()
 num_gpus_parallel = 2
 
 use_metadata = True
