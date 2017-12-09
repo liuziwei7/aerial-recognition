@@ -120,7 +120,8 @@ def get_lstm_model(params, codesStats):
         model.add(Dense(1024, activation='relu'))
         model.add(Dropout(0.5))
     else:
-        model.add(LSTM(4096, return_sequences=True, input_shape=(codesStats['max_temporal'], layerLength), dropout=0.5))
+        # model.add(LSTM(4096, return_sequences=True, input_shape=(codesStats['max_temporal'], layerLength), dropout=0.5))
+        model.add(LSTM(4096, return_sequences=True, input_shape=(codesStats['max_temporal'], layerLength), dropout=0.5, recurrent_dropout=0.5))
         model.add(Flatten())
     model.add(Dense(512, activation='relu'))
     model.add(Dropout(0.5))
