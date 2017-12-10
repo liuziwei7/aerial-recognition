@@ -82,6 +82,7 @@ class FMOWBaseline:
             self.params.files['lstm_test_struct'] = os.path.join(self.params.directories['working'], 'lstm_test_struct_with_metadata.json')
         
             self.params.files['cnn_finetune_reweight_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_models'], 'cnn_image_and_metadata.model')
+            self.params.files['cnn_finetune_reweight_aug_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_aug_models'], 'cnn_image_and_metadata.model')
             self.params.files['cnn_finetune_reweight_nlm_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_nlm_models'], 'cnn_image_and_metadata.model')
             self.params.files['cnn_finetune_reweight_spp_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_spp_models'], 'cnn_image_and_metadata.model')
             self.params.files['cnn_finetune_reweight_deform_model'] = os.path.join(self.params.directories['cnn_finetune_reweight_deform_models'], 'cnn_image_and_metadata.model')
