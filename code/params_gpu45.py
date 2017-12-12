@@ -47,9 +47,9 @@ train_lstm = False
 test_cnn = False
 test_lstm = False
 
-use_finetune = True
+use_finetune = False
 use_fusion = False
-use_reweight = True
+use_reweight = False
 use_aug = False
 
 use_nlm = False
@@ -63,11 +63,11 @@ cnn_adam_loss = 'categorical_crossentropy'
 # cnn_epochs = 50
 cnn_epochs = 5
 	
-# lstm_adam_learning_rate = 1e-4
-lstm_adam_learning_rate = 1e-5
+lstm_adam_learning_rate = 1e-4
+# lstm_adam_learning_rate = 1e-5
 lstm_loss = 'categorical_crossentropy'
-# lstm_epochs = 100
-lstm_epochs = 5
+lstm_epochs = 100
+# lstm_epochs = 5
 
 #DIRECTORIES AND FILES
 directories = {}
