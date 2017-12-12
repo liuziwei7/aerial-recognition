@@ -27,7 +27,7 @@ num_gpus_parallel = 2
 use_metadata = True
 
 # batch_size_cnn = 128
-batch_size_cnn = 56
+batch_size_cnn = 48
 # batch_size_lstm = 512
 batch_size_lstm = 256
 # batch_size_eval = 128
