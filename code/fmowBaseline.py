@@ -388,6 +388,7 @@ class FMOWBaseline:
                 lstmModel = lstmModel.layers[-2]
             else:
                 lstmModel = load_model(self.params.files['lstm_model'], custom_objects={'tf':tf})
+                lstmModel = lstmModel.layers[-2]
 
         index = 0
         timestr = time.strftime("%Y%m%d-%H%M%S")
