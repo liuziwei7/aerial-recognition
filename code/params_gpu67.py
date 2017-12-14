@@ -49,7 +49,7 @@ test_lstm = False
 
 use_finetune = True
 use_fusion = False
-use_reweight = True
+use_reweight = False
 use_aug = True
 
 use_nlm = False
