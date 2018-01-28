@@ -1,4 +1,4 @@
-## Aerial Image Recognition
+# Deep Aerial Image Recognition
 
 <img src='./misc/demo.gif' width=480>
 
