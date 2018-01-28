@@ -1,6 +1,6 @@
 ## Aerial Image Recognition
 
-<img src='./misc/demo.gif' width=360>
+<img src='./misc/demo.gif' width=480>
 
 Further information please contact [Ziwei Liu](https://liuziwei7.github.io/).
 
